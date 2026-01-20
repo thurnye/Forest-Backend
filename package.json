@@ -23,7 +23,8 @@
     "pm2:stop": "pm2 stop ecosystem.config.js",
     "pm2:restart": "pm2 restart ecosystem.config.js",
     "pm2:delete": "pm2 delete ecosystem.config.js",
-    "seed": "ts-node scripts/seed/index.ts"
+    "seed": "ts-node scripts/seed/index.ts",
+    "create:service": "node ./scripts/generate-script/create-service.js"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

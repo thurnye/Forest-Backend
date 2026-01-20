@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import User from '../db/User';
+import Student from '../db/Student';
 import {
   hashPassword,
   comparePassword,
@@ -9,7 +9,7 @@ import { generateTokens, verifyRefresh } from '../domain/token';
 import { success, fail, logger } from '@readingForest/libs';
 
 /**
- * Register new user
+ * Register new student
  */
 export const register = async (
   req: Request,
@@ -17,20 +17,28 @@ export const register = async (
   _next: NextFunction,
 ): Promise<void> => {
   try {
-    const { email, password, firstName, lastName, username } = req.body;
+    const {
+      email,
+      password,
+      firstName,
+      lastName,
+      studentName,
+      targetGradeLevel,
+      diagnosticEnabled,
+    } = req.body;
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      fail(res, 'User with this email already exists', 409);
+    // Check if student already exists
+    const existingStudent = await Student.findOne({ email });
+    if (existingStudent) {
+      fail(res, 'Student with this email already exists', 409);
       return;
     }
 
-    // Check if username is taken
-    if (username) {
-      const existingUsername = await User.findOne({ username });
-      if (existingUsername) {
-        fail(res, 'Username is already taken', 409);
+    // Check if studentName is taken
+    if (studentName) {
+      const existingStudentName = await Student.findOne({ studentName });
+      if (existingStudentName) {
+        fail(res, 'StudentName is already taken', 409);
         return;
       }
     }
@@ -38,39 +46,38 @@ export const register = async (
     // Hash password
     const hashedPassword = await hashPassword(password);
 
-    // Generate email verification token
-    const emailVerificationToken = generateToken();
-    const emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-
-    // Create user
-    const user = await User.create({
+    // Create student
+    const student = await Student.create({
       email,
       password: hashedPassword,
       firstName,
       lastName,
-      username,
-      emailVerificationToken,
-      emailVerificationExpires,
+      studentName,
+      targetGradeLevel,
+      diagnosticEnabled,
     });
 
-    logger.info('User registered', {
-      userId: user._id,
-      email: user.email,
-      _id: user._id,
+    logger.info('Student registered', {
+      studentId: student._id,
+      email: student.email,
+      _id: student._id,
     });
-
-    // TODO: Send verification email
 
     success(
       res,
       {
-        id: user._id,
-        email: user.email,
-        username: user.username,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        bio: user.bio,
-        avatar: user.avatar,
+        id: student._id,
+        email: student.email,
+        firstName: student.firstName,
+        lastName: student.lastName,
+        bio: student.bio,
+        avatar: student.avatar,
+        role: student.role,
+        readingLevel: student.readingLevel,
+        targetGradeLevel: student.targetGradeLevel,
+        hasCompletedDiagnostic: student.hasCompletedDiagnostic,
+        diagnosticEnabled: student.diagnosticEnabled,
+        guardian: student.guardian,
       },
       'Registration successful. Please check your email to verify your account.',
       undefined,
@@ -83,7 +90,7 @@ export const register = async (
 };
 
 /**
- * Login user
+ * Login student
  */
 export const login = async (
   req: Request,
@@ -94,31 +101,32 @@ export const login = async (
     const { email, password } = req.body;
     // console.log('Login attempt for email:', { email, password });
 
-    // Find user with password field
-    const user = await User.findOne({ email }).select(
+    // Find student with password field
+    const student = await Student.findOne({ email }).select(
       '+password +refreshTokens',
     );
-    if (!user) {
+    if (!student) {
       fail(res, 'Invalid email or password', 401);
       return;
     }
 
     // Compare password
-    const isPasswordValid = await comparePassword(password, user.password);
+    const isPasswordValid = await comparePassword(password, student.password);
     if (!isPasswordValid) {
       fail(res, 'Invalid email or password', 401);
+      return;
     }
 
     // Generate tokens
     const { accessToken, refreshToken } = generateTokens(
-      user._id.toString(),
-      user.email,
-      user.role,
+      student._id.toString(),
+      student.email,
+      student.role,
     );
 
     // Store refresh token in database
-    user.refreshTokens.push(refreshToken);
-    await user.save();
+    student.refreshTokens.push(refreshToken);
+    await student.save();
 
     // Set refresh token in HTTP-only cookie
     res.cookie('refreshToken', refreshToken, {
@@ -131,19 +139,26 @@ export const login = async (
     // Set access token in header
     res.setHeader('x-access-token', accessToken);
 
-    logger.info('User logged in', { userId: user._id, email: user.email });
+    logger.info('Student logged in', {
+      studentId: student._id,
+      email: student.email,
+    });
 
     success(
       res,
       {
-        id: user._id,
-        email: user.email,
-        username: user.username,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        bio: user.bio,
-        avatar: user.avatar,
-        role: user.role,
+        id: student._id,
+        email: student.email,
+        firstName: student.firstName,
+        lastName: student.lastName,
+        bio: student.bio,
+        avatar: student.avatar,
+        role: student.role,
+        readingLevel: student.readingLevel,
+        targetGradeLevel: student.targetGradeLevel,
+        hasCompletedDiagnostic: student.hasCompletedDiagnostic,
+        diagnosticEnabled: student.diagnosticEnabled,
+        guardian: student.guardian,
         accessToken,
       },
       'Login successful',
@@ -173,28 +188,30 @@ export const refresh = async (
     // Verify refresh token
     const payload = verifyRefresh(refreshToken);
 
-    // Find user and check if refresh token exists in database
-    const user = await User.findById(payload.userId).select('+refreshTokens');
-    if (!user || !user.refreshTokens.includes(refreshToken)) {
+    // Find student and check if refresh token exists in database
+    const student = await Student.findById(payload.userId).select(
+      '+refreshTokens',
+    );
+    if (!student || !student.refreshTokens.includes(refreshToken)) {
       fail(res, 'Invalid refresh token', 401);
       return;
     }
 
     // Remove old refresh token
-    user.refreshTokens = user.refreshTokens.filter(
+    student.refreshTokens = student.refreshTokens.filter(
       (token) => token !== refreshToken,
     );
 
     // Generate new tokens
     const { accessToken, refreshToken: newRefreshToken } = generateTokens(
-      user._id.toString(),
-      user.email,
-      user.role,
+      student._id.toString(),
+      student.email,
+      student.role,
     );
 
     // Store new refresh token
-    user.refreshTokens.push(newRefreshToken);
-    await user.save();
+    student.refreshTokens.push(newRefreshToken);
+    await student.save();
 
     // Update cookie
     res.cookie('refreshToken', newRefreshToken, {
@@ -207,19 +224,23 @@ export const refresh = async (
     // Set access token in header
     res.setHeader('x-access-token', accessToken);
 
-    logger.info('Token refreshed', { userId: user._id });
+    logger.info('Token refreshed', { studentId: student._id });
 
     success(
       res,
       {
-        id: user._id,
-        email: user.email,
-        username: user.username,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        bio: user.bio,
-        avatar: user.avatar,
-        role: user.role,
+        id: student._id,
+        email: student.email,
+        firstName: student.firstName,
+        lastName: student.lastName,
+        bio: student.bio,
+        avatar: student.avatar,
+        role: student.role,
+        readingLevel: student.readingLevel,
+        targetGradeLevel: student.targetGradeLevel,
+        hasCompletedDiagnostic: student.hasCompletedDiagnostic,
+        diagnosticEnabled: student.diagnosticEnabled,
+        guardian: student.guardian,
         accessToken,
       },
       'Token refreshed successfully',
@@ -231,7 +252,7 @@ export const refresh = async (
 };
 
 /**
- * Logout user
+ * Logout student
  */
 export const logout = async (
   req: Request,
@@ -244,14 +265,16 @@ export const logout = async (
     if (refreshToken) {
       // Remove refresh token from database
       const payload = verifyRefresh(refreshToken);
-      const user = await User.findById(payload.userId).select('+refreshTokens');
+      const student = await Student.findById(payload.userId).select(
+        '+refreshTokens',
+      );
 
-      if (user) {
-        user.refreshTokens = user.refreshTokens.filter(
+      if (student) {
+        student.refreshTokens = student.refreshTokens.filter(
           (token) => token !== refreshToken,
         );
-        await user.save();
-        logger.info('User logged out', { userId: user._id });
+        await student.save();
+        logger.info('Student logged out', { studentId: student._id });
       }
     }
 
@@ -278,22 +301,25 @@ export const verifyEmail = async (
   try {
     const { token } = req.body;
 
-    const user = await User.findOne({
+    const student = await Student.findOne({
       emailVerificationToken: token,
       emailVerificationExpires: { $gt: new Date() },
     }).select('+emailVerificationToken +emailVerificationExpires');
 
-    if (!user) {
+    if (!student) {
       fail(res, 'Invalid or expired verification token', 400);
       return;
     }
 
-    user.isEmailVerified = true;
-    user.emailVerificationToken = undefined;
-    user.emailVerificationExpires = undefined;
-    await user.save();
+    student.isEmailVerified = true;
+    student.emailVerificationToken = undefined;
+    student.emailVerificationExpires = undefined;
+    await student.save();
 
-    logger.info('Email verified', { userId: user._id, email: user.email });
+    logger.info('Email verified', {
+      studentId: student._id,
+      email: student.email,
+    });
 
     success(res, null, 'Email verified successfully');
   } catch (error) {
@@ -313,12 +339,12 @@ export const resendVerification = async (
   try {
     const { email } = req.body;
 
-    const user = await User.findOne({ email }).select(
+    const student = await Student.findOne({ email }).select(
       '+emailVerificationToken',
     );
 
-    if (!user) {
-      // Don't reveal if user exists
+    if (!student) {
+      // Don't reveal if student exists
       success(
         res,
         null,
@@ -327,7 +353,7 @@ export const resendVerification = async (
       return;
     }
 
-    if (user.isEmailVerified) {
+    if (student.isEmailVerified) {
       fail(res, 'Email is already verified', 400);
       return;
     }
@@ -336,13 +362,13 @@ export const resendVerification = async (
     const emailVerificationToken = generateToken();
     const emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-    user.emailVerificationToken = emailVerificationToken;
-    user.emailVerificationExpires = emailVerificationExpires;
-    await user.save();
+    student.emailVerificationToken = emailVerificationToken;
+    student.emailVerificationExpires = emailVerificationExpires;
+    await student.save();
 
     logger.info('Verification email resent', {
-      userId: user._id,
-      email: user.email,
+      studentId: student._id,
+      email: student.email,
     });
 
     // TODO: Send verification email
@@ -365,10 +391,12 @@ export const requestPasswordReset = async (
   try {
     const { email } = req.body;
 
-    const user = await User.findOne({ email }).select('+passwordResetToken');
+    const student = await Student.findOne({ email }).select(
+      '+passwordResetToken',
+    );
 
-    if (!user) {
-      // Don't reveal if user exists
+    if (!student) {
+      // Don't reveal if student exists
       success(
         res,
         null,
@@ -381,13 +409,13 @@ export const requestPasswordReset = async (
     const passwordResetToken = generateToken();
     const passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
-    user.passwordResetToken = passwordResetToken;
-    user.passwordResetExpires = passwordResetExpires;
-    await user.save();
+    student.passwordResetToken = passwordResetToken;
+    student.passwordResetExpires = passwordResetExpires;
+    await student.save();
 
     logger.info('Password reset requested', {
-      userId: user._id,
-      email: user.email,
+      studentId: student._id,
+      email: student.email,
     });
 
     // TODO: Send password reset email
@@ -410,12 +438,12 @@ export const resetPassword = async (
   try {
     const { token, newPassword } = req.body;
 
-    const user = await User.findOne({
+    const student = await Student.findOne({
       passwordResetToken: token,
       passwordResetExpires: { $gt: new Date() },
     }).select('+password +passwordResetToken +passwordResetExpires');
 
-    if (!user) {
+    if (!student) {
       fail(res, 'Invalid or expired reset token', 400);
       return;
     }
@@ -423,14 +451,14 @@ export const resetPassword = async (
     // Hash new password
     const hashedPassword = await hashPassword(newPassword);
 
-    user.password = hashedPassword;
-    user.passwordResetToken = undefined;
-    user.passwordResetExpires = undefined;
-    await user.save();
+    student.password = hashedPassword;
+    student.passwordResetToken = undefined;
+    student.passwordResetExpires = undefined;
+    await student.save();
 
     logger.info('Password reset successful', {
-      userId: user._id,
-      email: user.email,
+      studentId: student._id,
+      email: student.email,
     });
 
     success(res, null, 'Password reset successful');
@@ -441,7 +469,7 @@ export const resetPassword = async (
 };
 
 /**
- * Change password (authenticated user)
+ * Change password (authenticated student)
  */
 export const changePassword = async (
   req: Request,
@@ -449,25 +477,28 @@ export const changePassword = async (
   _next: NextFunction,
 ): Promise<void> => {
   try {
-    const userId = req.headers['x-user-id'] as string;
+    const studentId = req.headers['x-student-id'] as string;
     const { oldPassword, newPassword } = req.body;
 
     // console.log("CHANGE PASSWORD BODY:::", req.body)
-    // console.log("CHANGE PASSWORD BODY userId:::", userId)
+    // console.log("CHANGE PASSWORD BODY studentId:::", studentId)
 
-    if (!userId) {
+    if (!studentId) {
       fail(res, 'Unauthorized', 401);
       return;
     }
 
-    const user = await User.findById(userId).select('+password');
-    if (!user) {
-      fail(res, 'User not found', 404);
+    const student = await Student.findById(studentId).select('+password');
+    if (!student) {
+      fail(res, 'Student not found', 404);
       return;
     }
 
     // Verify old password
-    const isPasswordValid = await comparePassword(oldPassword, user.password);
+    const isPasswordValid = await comparePassword(
+      oldPassword,
+      student.password,
+    );
     if (!isPasswordValid) {
       fail(res, 'Current password is incorrect', 401);
       return;
@@ -475,10 +506,13 @@ export const changePassword = async (
 
     // Hash new password
     const hashedPassword = await hashPassword(newPassword);
-    user.password = hashedPassword;
-    await user.save();
+    student.password = hashedPassword;
+    await student.save();
 
-    logger.info('Password changed', { userId: user._id, email: user.email });
+    logger.info('Password changed', {
+      studentId: student._id,
+      email: student.email,
+    });
 
     success(res, null, 'Password changed successfully');
   } catch (error) {

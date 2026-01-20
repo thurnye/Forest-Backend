@@ -1,27 +1,32 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 
-export interface IUser extends Document {
+export interface IStudent extends Document {
   _id: Types.ObjectId;
   email: string;
   password: string;
   firstName?: string;
   lastName?: string;
   username?: string;
-  bio?: string;
   avatar?: string;
+  bio?: string;
   isEmailVerified: boolean;
   emailVerificationToken?: string;
   emailVerificationExpires?: Date;
   passwordResetToken?: string;
   passwordResetExpires?: Date;
   refreshTokens: string[];
-  role: 'user' | 'admin' | 'moderator';
+  role: string;
+  readingLevel: string;
+  targetGradeLevel: string | number;
+  hasCompletedDiagnostic: boolean;
+  diagnosticEnabled: boolean;
+  guardian: mongoose.Types.ObjectId;
   reputation: number;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const UserSchema = new Schema<IUser>(
+const StudentSchema = new Schema<IStudent>(
   {
     email: {
       type: String,
@@ -83,8 +88,28 @@ const UserSchema = new Schema<IUser>(
     },
     role: {
       type: String,
-      enum: ['user', 'admin', 'moderator'],
-      default: 'user',
+      default: 'student',
+    },
+    guardian: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      index: true,
+    },
+    readingLevel: {
+      type: String,
+      default: '-',
+    },
+    targetGradeLevel: {
+      type: Schema.Types.Mixed,
+      default: '-',
+    },
+    hasCompletedDiagnostic: {
+      type: Boolean,
+      default: false,
+    },
+    diagnosticEnabled: {
+      type: Boolean,
+      default: false,
     },
     reputation: {
       type: Number,
@@ -93,14 +118,15 @@ const UserSchema = new Schema<IUser>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Indexes for performance
-UserSchema.index({ email: 1 });
-UserSchema.index({ username: 1 });
-UserSchema.index({ createdAt: -1 });
+StudentSchema.index({ email: 1 });
+StudentSchema.index({ username: 1 });
+StudentSchema.index({ guardian: 1, isActive: 1, createdAt: -1 });
+StudentSchema.index({ createdAt: -1 });
 
-const User = mongoose.model<IUser>('User', UserSchema);
+const Student = mongoose.model<IStudent>('Student', StudentSchema);
 
-export default User;
+export default Student;

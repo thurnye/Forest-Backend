@@ -21,14 +21,16 @@ export const swaggerSpec = {
     },
   ],
   tags: [
-    { name: 'Authentication', description: 'Auth service endpoints' },
+    { name: 'Guardian Authentication', description: 'Guardian auth endpoints' },
+    { name: 'Student Authentication', description: 'Student auth endpoints' },
     { name: 'User', description: 'User service endpoints' },
   ],
   paths: {
-    '/api/auth/register': {
+    // Guardian Authentication
+    '/api/auth/guardian/register': {
       post: {
-        summary: 'Register new user',
-        tags: ['Authentication'],
+        summary: 'Register new guardian',
+        tags: ['Guardian Authentication'],
         requestBody: {
           required: true,
           content: {
@@ -40,23 +42,24 @@ export const swaggerSpec = {
                   password: { type: 'string', minLength: 8 },
                   firstName: { type: 'string' },
                   lastName: { type: 'string' },
+                  guardianName: { type: 'string' },
                 },
-                required: ['email', 'password'],
+                required: ['email', 'password', 'firstName', 'lastName'],
               },
             },
           },
         },
         responses: {
-          '201': { description: 'User registered successfully' },
+          '201': { description: 'Guardian registered successfully' },
           '400': { description: 'Validation error' },
-          '409': { description: 'User already exists' },
+          '409': { description: 'Guardian already exists' },
         },
       },
     },
-    '/api/auth/login': {
+    '/api/auth/guardian/login': {
       post: {
-        summary: 'Login user',
-        tags: ['Authentication'],
+        summary: 'Login guardian',
+        tags: ['Guardian Authentication'],
         requestBody: {
           required: true,
           content: {
@@ -78,6 +81,102 @@ export const swaggerSpec = {
         },
       },
     },
+    '/api/auth/guardian/refresh': {
+      post: {
+        summary: 'Refresh guardian access token',
+        tags: ['Guardian Authentication'],
+        responses: {
+          '200': { description: 'Token refreshed successfully' },
+          '401': { description: 'Invalid refresh token' },
+        },
+      },
+    },
+    '/api/auth/guardian/logout': {
+      post: {
+        summary: 'Logout guardian',
+        tags: ['Guardian Authentication'],
+        responses: {
+          '200': { description: 'Logout successful' },
+        },
+      },
+    },
+    // Student Authentication
+    '/api/auth/student/register': {
+      post: {
+        summary: 'Register new student',
+        tags: ['Student Authentication'],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  email: { type: 'string', format: 'email' },
+                  password: { type: 'string', minLength: 8 },
+                  firstName: { type: 'string' },
+                  lastName: { type: 'string' },
+                  studentName: { type: 'string' },
+                  targetGradeLevel: { type: 'string' },
+                  diagnosticEnabled: { type: 'boolean' },
+                },
+                required: ['email', 'password', 'firstName', 'lastName'],
+              },
+            },
+          },
+        },
+        responses: {
+          '201': { description: 'Student registered successfully' },
+          '400': { description: 'Validation error' },
+          '409': { description: 'Student already exists' },
+        },
+      },
+    },
+    '/api/auth/student/login': {
+      post: {
+        summary: 'Login student',
+        tags: ['Student Authentication'],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  email: { type: 'string', format: 'email' },
+                  password: { type: 'string' },
+                },
+                required: ['email', 'password'],
+              },
+            },
+          },
+        },
+        responses: {
+          '200': { description: 'Login successful' },
+          '401': { description: 'Invalid credentials' },
+        },
+      },
+    },
+    '/api/auth/student/refresh': {
+      post: {
+        summary: 'Refresh student access token',
+        tags: ['Student Authentication'],
+        responses: {
+          '200': { description: 'Token refreshed successfully' },
+          '401': { description: 'Invalid refresh token' },
+        },
+      },
+    },
+    '/api/auth/student/logout': {
+      post: {
+        summary: 'Logout student',
+        tags: ['Student Authentication'],
+        responses: {
+          '200': { description: 'Logout successful' },
+        },
+      },
+    },
+    // User endpoints
     '/api/user/{id}': {
       get: {
         summary: 'Get user profile',

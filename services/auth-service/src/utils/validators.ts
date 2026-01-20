@@ -4,12 +4,22 @@ import { commonSchemas } from '@readingForest/libs';
 /**
  * Registration validation schema
  */
-export const registerSchema = Joi.object({
+export const registerGuardianSchema = Joi.object({
   email: commonSchemas.email,
   password: commonSchemas.password,
   firstName: Joi.string().optional().trim(),
   lastName: Joi.string().optional().trim(),
   username: Joi.string().alphanum().min(3).max(30).optional().trim(),
+});
+
+export const registerStudentSchema = Joi.object({
+  email: commonSchemas.email,
+  password: commonSchemas.password,
+  firstName: Joi.string().optional().trim(),
+  lastName: Joi.string().optional().trim(),
+  studentName: Joi.string().alphanum().min(3).max(30).optional().trim(),
+  targetGradeLevel: Joi.string().trim().required(),
+  diagnosticEnabled: Joi.boolean().optional(),
 });
 
 /**

@@ -10,7 +10,8 @@ import { logger, mapErrorToResponse } from '@readingForest/libs';
 dotenv.config();
 
 // Import routes
-import authRouter from './routes/auth';
+import authGuardianRouter from './routes/auth-guardian.route';
+import authStudentRouter from './routes/auth-student.route';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -42,7 +43,8 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 // app.get('/health', healthCheck);
 
 // Routes
-app.use('/', authRouter);
+app.use('/guardian', authGuardianRouter);
+app.use('/student', authStudentRouter);
 
 // 404 handler
 app.use((_req: Request, res: Response) => {

@@ -9,14 +9,14 @@ import {
   requestPasswordReset,
   resetPassword,
   changePassword,
-} from '../controllers/AuthController';
+} from '../controllers/Auth-Student-Controller';
 import { validate } from '@readingForest/libs';
-import { registerSchema, loginSchema } from '../utils/validators';
+import { registerStudentSchema, loginSchema } from '../utils/validators';
 
 const router = Router();
 
 // POST /register - Register new user
-router.post('/register', validate(registerSchema), register);
+router.post('/register', validate(registerStudentSchema), register);
 
 // POST /login - Login user
 router.post('/login', validate(loginSchema), login);
