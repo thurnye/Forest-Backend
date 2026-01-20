@@ -1,0 +1,58 @@
+/**
+ * Swagger/OpenAPI specification for auth-service
+ * TODO: Implement full Swagger documentation
+ */
+
+export const swaggerSpec = {
+  openapi: '3.0.0',
+  info: {
+    title: 'ReadingForest Auth Service API',
+    version: '1.0.0',
+    description: 'Authentication and authorization service for ReadingForest ',
+  },
+  servers: [
+    {
+      url: process.env.AUTH_SERVICE_URL || 'https://api.example.com/auth',
+      description: 'Auth service',
+    },
+  ],
+  paths: {
+    '/register': {
+      post: {
+        summary: 'Register a new user',
+        tags: ['Authentication'],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  email: { type: 'string', format: 'email' },
+                  password: { type: 'string', minLength: 8 },
+                  firstName: { type: 'string' },
+                  lastName: { type: 'string' },
+                  username: { type: 'string' },
+                },
+                required: ['email', 'password'],
+              },
+            },
+          },
+        },
+      },
+    },
+    '/login': {
+      post: {
+        summary: 'Login user',
+        tags: ['Authentication'],
+      },
+    },
+    '/me': {
+      get: {
+        summary: 'get Current user',
+        tags: ['Authentication'],
+      },
+    },
+    // TODO: Add more endpoints
+  },
+};
