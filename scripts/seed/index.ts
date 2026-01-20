@@ -17,7 +17,7 @@ const MONGODB_URI =
 /**
  * User model (minimal for seeding)
  */
-const UserSchema = new mongoose.Schema({
+const GuardianSchema = new mongoose.Schema({
   email: String,
   password: String,
   firstName: String,
@@ -28,24 +28,31 @@ const UserSchema = new mongoose.Schema({
   reputation: Number,
   isEmailVerified: Boolean,
 });
+const StudentSchema = new mongoose.Schema({
+  email: String,
+  password: String,
+  firstName: String,
+  lastName: String,
+  username: String,
+  bio: String,
+  role: String,
+  reputation: Number,
+  isEmailVerified: Boolean,
+  readingLevel: String,
+  targetGradeLevel: mongoose.Schema.Types.Mixed,
+  hasCompletedDiagnostic: Boolean,
+  diagnosticEnabled: Boolean,
+  guardian: mongoose.Types.ObjectId,
+});
 
-const User = mongoose.model('User', UserSchema);
+const Student = mongoose.model('Student', StudentSchema);
+const Guardian = mongoose.model('Guardian', GuardianSchema);
 
 /**
  * Sample users to seed
  */
-const sampleUsers = [
-  {
-    email: 'testprogram404@gmail.com',
-    password: 'Password123!',
-    firstName: 'Admin',
-    lastName: 'Food-Admin',
-    username: 'johndoe',
-    bio: 'Food enthusiast and home chef',
-    role: 'admin',
-    reputation: 100,
-    isEmailVerified: true,
-  },
+const sampleStudents = [
+
   {
     email: 'john.doe@example.com',
     password: 'Password123',
@@ -53,9 +60,14 @@ const sampleUsers = [
     lastName: 'Doe',
     username: 'johndoe',
     bio: 'Food enthusiast and home chef',
-    role: 'user',
+    role: 'student',
     reputation: 100,
     isEmailVerified: true,
+    readingLevel: 'grade-1',
+    targetGradeLevel: 'grade-1',
+    hasCompletedDiagnostic: true,
+    diagnosticEnabled: false,
+    guardian: new mongoose.Types.ObjectId(),
   },
   {
     email: 'jane.smith@example.com',
@@ -64,20 +76,15 @@ const sampleUsers = [
     lastName: 'Smith',
     username: 'janesmith',
     bio: 'Professional chef and recipe creator',
-    role: 'user',
+    role: 'student',
     reputation: 250,
     isEmailVerified: true,
-  },
-  {
-    email: 'admin@readingForest.com',
-    password: 'AdminPass123',
-    firstName: 'Admin',
-    lastName: 'User',
-    username: 'admin',
-    bio: 'Platform administrator',
-    role: 'user',
-    reputation: 500,
-    isEmailVerified: true,
+    readingLevel: 'grade-1',
+    targetGradeLevel: 'grade-1',
+    hasCompletedDiagnostic: true,
+    diagnosticEnabled: false,
+    guardian: new mongoose.Types.ObjectId(),
+    
   },
   {
     email: 'chef.gordon@example.com',
@@ -86,9 +93,15 @@ const sampleUsers = [
     lastName: 'Chef',
     username: 'chefgordon',
     bio: 'Master chef with 20 years of experience',
-    role: 'user',
+    role: 'student',
     reputation: 1000,
     isEmailVerified: true,
+    readingLevel: 'grade-1',
+    targetGradeLevel: 'grade-1',
+    hasCompletedDiagnostic: true,
+    diagnosticEnabled: false,
+    guardian: new mongoose.Types.ObjectId(),
+    
   },
   {
     email: 'baker.mary@example.com',
@@ -97,11 +110,42 @@ const sampleUsers = [
     lastName: 'Baker',
     username: 'marybaker',
     bio: 'Pastry chef and baking expert',
-    role: 'user',
+    role: 'student',
     reputation: 350,
     isEmailVerified: true,
+    readingLevel: 'grade-1',
+    targetGradeLevel: 'grade-1',
+    hasCompletedDiagnostic: true,
+    diagnosticEnabled: false,
+    guardian: new mongoose.Types.ObjectId(),
   },
 ];
+
+const sampleGuardians = [
+    {
+    email: 'parent@gmail.com',
+    password: 'Password123!',
+    firstName: 'Admin',
+    lastName: 'Food-Admin',
+    username: 'johndoe',
+    bio: 'Food enthusiast and home chef',
+    role: 'parent',
+    reputation: 100,
+    isEmailVerified: true,
+    
+  },
+  {
+    email: 'teacher@readingForest.com',
+    password: 'AdminPass123',
+    firstName: 'Admin',
+    lastName: 'User',
+    username: 'admin',
+    bio: 'Platform administrator',
+    role: 'teacher',
+    reputation: 500,
+    isEmailVerified: true,
+  }
+]
 
 /**
  * Seed database with users
@@ -117,32 +161,48 @@ async function seedDatabase() {
     // Clear existing users (optional - be careful in production!)
     const shouldClear = process.env.CLEAR_DB === 'true';
     if (shouldClear) {
-      await User.deleteMany({});
+      await Student.deleteMany({});
       // console.log('🗑️  Cleared existing users');
     }
 
     // Hash passwords and create users
     // console.log('👤 Creating users...');
-    const usersToCreate = await Promise.all(
-      sampleUsers.map(async (user) => ({
+    const guardiansToCreate = await Promise.all(
+      sampleGuardians.map(async (user) => ({
+        ...user,
+        password: await bcrypt.hash(user.password, 10),
+      })),
+    );
+    const studentsToCreate = await Promise.all(
+      sampleStudents.map(async (user) => ({
         ...user,
         password: await bcrypt.hash(user.password, 10),
       })),
     );
 
-    const createdUsers = await User.insertMany(usersToCreate);
+    const createdGuardians = await Guardian.insertMany(guardiansToCreate);
+
+    const firstGuardianId = createdGuardians[0]._id;
+    studentsToCreate.forEach((student) => {
+      student.guardian = firstGuardianId;
+    });
+
+    await Student.insertMany(studentsToCreate);
     // console.log(`✅ Created ${createdUsers.length} users`);
 
     // Log created users (without passwords)
     // console.log('\n📋 Created Users:');
-    createdUsers.forEach((user) => {
-      // console.log(`  - ${user.email} (${user.username}) - Role: ${user.role}`);
-    });
+    // createdGuardians.forEach((guardian) => {
+    //   // console.log(`  - ${user.email} (${user.username}) - Role: ${user.role}`);
+    // });
+    // createdStudents.forEach((user) => {
+    //   // console.log(`  - ${user.email} (${user.username}) - Role: ${user.role}`);
+    // });
 
-    // console.log('\n✨ Database seeding completed successfully!');
+    console.log('\n✨ Database seeding completed successfully!');
     // console.log('\n📝 Test Credentials:');
     // console.log('  Email: john.doe@example.com');
-    // console.log('  Password: Password123');
+    console.log('  Password: Password123');
     // console.log('\n  Email: admin@readingForest.com');
     // console.log('  Password: AdminPass123');
   } catch (error) {
