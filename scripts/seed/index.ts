@@ -125,9 +125,9 @@ const sampleGuardians = [
     {
     email: 'parent@gmail.com',
     password: 'Password123!',
-    firstName: 'Admin',
-    lastName: 'Food-Admin',
-    username: 'johndoe',
+    firstName: 'Parent',
+    lastName: 'Test',
+    username: 'parent-user',
     bio: 'Food enthusiast and home chef',
     role: 'parent',
     reputation: 100,
