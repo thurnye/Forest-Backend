@@ -11,7 +11,8 @@ const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const libs_1 = require("@readingForest/libs");
 dotenv_1.default.config();
-const auth_1 = __importDefault(require("./routes/auth"));
+const auth_guardian_route_1 = __importDefault(require("./routes/auth-guardian.route"));
+const auth_student_route_1 = __importDefault(require("./routes/auth-student.route"));
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 3001;
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -31,7 +32,8 @@ app.use((req, _res, next) => {
     });
     next();
 });
-app.use('/', auth_1.default);
+app.use('/guardian', auth_guardian_route_1.default);
+app.use('/student', auth_student_route_1.default);
 app.use((_req, res) => {
     res.status(404).json({
         success: false,

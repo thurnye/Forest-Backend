@@ -1,6 +1,8 @@
 import Joi from 'joi';
-export declare const registerSchema: Joi.ObjectSchema<any>;
-export declare const loginSchema: Joi.ObjectSchema<any>;
+export declare const registerGuardianSchema: Joi.ObjectSchema<any>;
+export declare const registerStudentSchema: Joi.ObjectSchema<any>;
+export declare const GuardianLoginSchema: Joi.ObjectSchema<any>;
+export declare const studentLoginSchema: Joi.ObjectSchema<any>;
 export declare const changePasswordSchema: Joi.ObjectSchema<any>;
 export declare const resetRequestSchema: Joi.ObjectSchema<any>;
 export declare const resetPasswordSchema: Joi.ObjectSchema<any>;

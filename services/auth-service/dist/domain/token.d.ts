@@ -1,5 +1,5 @@
 import { TokenPayload } from '@readingForest/libs';
-export declare const generateTokens: (userId: string, email: string, role?: string) => {
+export declare const generateTokens: (userId: string, email: string, username?: string, role?: string) => {
     accessToken: string;
     refreshToken: string;
 };

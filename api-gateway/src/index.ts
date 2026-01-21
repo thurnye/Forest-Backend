@@ -14,6 +14,8 @@ import { optionalAuth } from './middleware/auth';
 // Proxy routes
 import authRoutes from './routes/auth';
 import userRoutes from './routes/users';
+import studentRoutes from './routes/student';
+import guardianRoutes from './routes/guardian';
 
 // Utilities
 import { healthCheck } from './health';
@@ -42,6 +44,8 @@ app.use(express.urlencoded({ extended: true }));
 // --- Proxy microservice routes ---
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/student', studentRoutes);
+app.use('/api/guardian', guardianRoutes);
 
 // Health & Docs
 app.get('/health', healthCheck);

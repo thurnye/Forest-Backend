@@ -12,9 +12,11 @@ import {
 export const generateTokens = (
   userId: string,
   email: string,
+  username?: string,
   role?: string,
+  
 ) => {
-  const payload: TokenPayload = { userId, email, role };
+  const payload: TokenPayload = { userId, email, username, role };
 
   return {
     accessToken: signAccessToken(payload),

@@ -2,38 +2,32 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 
 export interface IStudent extends Document {
   _id: Types.ObjectId;
-  email: string;
+  guardianId: Types.ObjectId;
   password: string;
-  firstName?: string;
-  lastName?: string;
+  firstName: string;
+  lastName: string;
   username?: string;
   avatar?: string;
-  bio?: string;
-  isEmailVerified: boolean;
-  emailVerificationToken?: string;
-  emailVerificationExpires?: Date;
+  dateOfBirth?: Date;
+  grade?: string;
+  readingLevel: string;
+  targetGradeLevel: string;
+  hasCompletedDiagnostic: boolean;
+  diagnosticEnabled: boolean;
   passwordResetToken?: string;
   passwordResetExpires?: Date;
   refreshTokens: string[];
-  role: string;
-  readingLevel: string;
-  targetGradeLevel: string | number;
-  hasCompletedDiagnostic: boolean;
-  diagnosticEnabled: boolean;
-  guardian: mongoose.Types.ObjectId;
-  reputation: number;
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
 const StudentSchema = new Schema<IStudent>(
   {
-    email: {
-      type: String,
+    guardianId: {
+      type: Schema.Types.ObjectId,
       required: true,
-      unique: true,
-      lowercase: true,
-      trim: true,
+      ref: 'Guardian',
     },
     password: {
       type: String,
@@ -42,10 +36,12 @@ const StudentSchema = new Schema<IStudent>(
     },
     firstName: {
       type: String,
+      required: true,
       trim: true,
     },
     lastName: {
       type: String,
+      required: true,
       trim: true,
     },
     username: {
@@ -53,25 +49,36 @@ const StudentSchema = new Schema<IStudent>(
       unique: true,
       sparse: true,
       trim: true,
-    },
-    bio: {
-      type: String,
-      maxlength: 500,
+      required: true,
     },
     avatar: {
       type: String,
     },
-    isEmailVerified: {
+    dateOfBirth: {
+      type: Date,
+    },
+    grade: {
+      type: String,
+    },
+    readingLevel: {
+      type: String,
+      default: 'pre-k',
+    },
+    targetGradeLevel: {
+      type: String,
+      default: 'grade-1',
+    },
+    hasCompletedDiagnostic: {
       type: Boolean,
       default: false,
     },
-    emailVerificationToken: {
-      type: String,
-      select: false,
+    diagnosticEnabled: {
+      type: Boolean,
+      default: true,
     },
-    emailVerificationExpires: {
-      type: Date,
-      select: false,
+    isActive: {
+      type: Boolean,
+      default: true,
     },
     passwordResetToken: {
       type: String,
@@ -86,35 +93,6 @@ const StudentSchema = new Schema<IStudent>(
       default: [],
       select: false,
     },
-    role: {
-      type: String,
-      default: 'student',
-    },
-    guardian: {
-      type: Schema.Types.ObjectId,
-      required: true,
-      index: true,
-    },
-    readingLevel: {
-      type: String,
-      default: '-',
-    },
-    targetGradeLevel: {
-      type: Schema.Types.Mixed,
-      default: '-',
-    },
-    hasCompletedDiagnostic: {
-      type: Boolean,
-      default: false,
-    },
-    diagnosticEnabled: {
-      type: Boolean,
-      default: false,
-    },
-    reputation: {
-      type: Number,
-      default: 0,
-    },
   },
   {
     timestamps: true,
@@ -122,10 +100,9 @@ const StudentSchema = new Schema<IStudent>(
 );
 
 // Indexes for performance
-StudentSchema.index({ email: 1 });
-StudentSchema.index({ username: 1 });
-StudentSchema.index({ guardian: 1, isActive: 1, createdAt: -1 });
-StudentSchema.index({ createdAt: -1 });
+StudentSchema.index({ guardianId: 1 });
+StudentSchema.index({ guardianId: 1, isActive: 1, createdAt: -1 });
+StudentSchema.index({ username: 1 }, { unique: true });
 
 const Student = mongoose.model<IStudent>('Student', StudentSchema);
 

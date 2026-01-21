@@ -54,7 +54,7 @@ const Guardian = mongoose.model('Guardian', GuardianSchema);
 const sampleStudents = [
 
   {
-    email: 'john.doe@example.com',
+    // email: 'john.doe@example.com',
     password: 'Password123',
     firstName: 'John',
     lastName: 'Doe',
@@ -62,7 +62,6 @@ const sampleStudents = [
     bio: 'Food enthusiast and home chef',
     role: 'student',
     reputation: 100,
-    isEmailVerified: true,
     readingLevel: 'grade-1',
     targetGradeLevel: 'grade-1',
     hasCompletedDiagnostic: true,
@@ -70,7 +69,6 @@ const sampleStudents = [
     guardian: new mongoose.Types.ObjectId(),
   },
   {
-    email: 'jane.smith@example.com',
     password: 'Password123',
     firstName: 'Jane',
     lastName: 'Smith',
@@ -78,7 +76,6 @@ const sampleStudents = [
     bio: 'Professional chef and recipe creator',
     role: 'student',
     reputation: 250,
-    isEmailVerified: true,
     readingLevel: 'grade-1',
     targetGradeLevel: 'grade-1',
     hasCompletedDiagnostic: true,
@@ -87,7 +84,6 @@ const sampleStudents = [
     
   },
   {
-    email: 'chef.gordon@example.com',
     password: 'Password123',
     firstName: 'Gordon',
     lastName: 'Chef',
@@ -95,7 +91,6 @@ const sampleStudents = [
     bio: 'Master chef with 20 years of experience',
     role: 'student',
     reputation: 1000,
-    isEmailVerified: true,
     readingLevel: 'grade-1',
     targetGradeLevel: 'grade-1',
     hasCompletedDiagnostic: true,
@@ -104,7 +99,7 @@ const sampleStudents = [
     
   },
   {
-    email: 'baker.mary@example.com',
+    // email: 'baker.mary@example.com',
     password: 'Password123',
     firstName: 'Mary',
     lastName: 'Baker',
@@ -112,7 +107,6 @@ const sampleStudents = [
     bio: 'Pastry chef and baking expert',
     role: 'student',
     reputation: 350,
-    isEmailVerified: true,
     readingLevel: 'grade-1',
     targetGradeLevel: 'grade-1',
     hasCompletedDiagnostic: true,
@@ -135,7 +129,7 @@ const sampleGuardians = [
     
   },
   {
-    email: 'teacher@readingForest.com',
+    email: 'Admin@readingForest.com',
     password: 'AdminPass123',
     firstName: 'Admin',
     lastName: 'User',

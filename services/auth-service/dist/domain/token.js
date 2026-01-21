@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.verifyRefresh = exports.verifyAccess = exports.generateTokens = void 0;
 const libs_1 = require("@readingForest/libs");
-const generateTokens = (userId, email, role) => {
-    const payload = { userId, email, role };
+const generateTokens = (userId, email, username, role) => {
+    const payload = { userId, email, username, role };
     return {
         accessToken: (0, libs_1.signAccessToken)(payload),
         refreshToken: (0, libs_1.signRefreshToken)(payload),

@@ -3,6 +3,7 @@
   "services": {
     "auth-service": 3001,
     "user-service": 3002,
-    "parent-service": 3003
+    "student-service": 3003,
+    "guardian-service": 3004
   }
 }

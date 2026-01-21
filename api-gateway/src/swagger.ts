@@ -24,9 +24,13 @@ export const swaggerSpec = {
     { name: 'Guardian Authentication', description: 'Guardian auth endpoints' },
     { name: 'Student Authentication', description: 'Student auth endpoints' },
     { name: 'User', description: 'User service endpoints' },
+    { name: 'Student', description: 'Student service endpoints' },
+    { name: 'Guardian', description: 'Guardian service endpoints' },
   ],
   paths: {
+    // ==========================================
     // Guardian Authentication
+    // ==========================================
     '/api/auth/guardian/register': {
       post: {
         summary: 'Register new guardian',
@@ -112,13 +116,14 @@ export const swaggerSpec = {
               schema: {
                 type: 'object',
                 properties: {
-                  email: { type: 'string', format: 'email' },
+                  username: { type: 'string', format: 'email' },
                   password: { type: 'string', minLength: 8 },
                   firstName: { type: 'string' },
                   lastName: { type: 'string' },
-                  studentName: { type: 'string' },
+                  dateOfBirth: { type: 'string', format: 'date' },
                   targetGradeLevel: { type: 'string' },
                   diagnosticEnabled: { type: 'boolean' },
+                  guardianId: { type: 'string' },
                 },
                 required: ['email', 'password', 'firstName', 'lastName'],
               },
@@ -143,10 +148,10 @@ export const swaggerSpec = {
               schema: {
                 type: 'object',
                 properties: {
-                  email: { type: 'string', format: 'email' },
+                  username: { type: 'string', format: 'email' },
                   password: { type: 'string' },
                 },
-                required: ['email', 'password'],
+                required: ['username', 'password'],
               },
             },
           },
@@ -176,7 +181,10 @@ export const swaggerSpec = {
         },
       },
     },
+
+    // ==========================================
     // User endpoints
+    // ==========================================
     '/api/user/{id}': {
       get: {
         summary: 'Get user profile',
@@ -192,6 +200,410 @@ export const swaggerSpec = {
         responses: {
           '200': { description: 'User profile retrieved' },
           '404': { description: 'User not found' },
+        },
+      },
+    },
+
+    // ==========================================
+    // Student Service endpoints
+    // ==========================================
+    '/api/student/students/{id}': {
+      get: {
+        summary: 'Get student detail',
+        tags: ['Student'],
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            schema: { type: 'string' },
+            description: 'Student ID',
+          },
+        ],
+        responses: {
+          '200': { description: 'Student detail with progress, assessments, attempts' },
+          '404': { description: 'Student not found' },
+        },
+      },
+    },
+    '/api/student/students/guardian/{guardianId}': {
+      get: {
+        summary: 'Get students by guardian',
+        tags: ['Student'],
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: 'guardianId',
+            in: 'path',
+            required: true,
+            schema: { type: 'string' },
+          },
+        ],
+        responses: {
+          '200': { description: 'List of students for guardian' },
+        },
+      },
+    },
+    '/api/student/students/lookup': {
+      get: {
+        summary: 'Lookup student by email',
+        tags: ['Student'],
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: 'email',
+            in: 'query',
+            required: true,
+            schema: { type: 'string', format: 'email' },
+          },
+        ],
+        responses: {
+          '200': { description: 'Student found' },
+          '404': { description: 'Student not found' },
+        },
+      },
+    },
+    '/api/student/exercises': {
+      get: {
+        summary: 'Get exercises by reading level',
+        tags: ['Student'],
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'readingLevel', in: 'query', required: true, schema: { type: 'string' } },
+          { name: 'skillStrand', in: 'query', schema: { type: 'string' } },
+          { name: 'type', in: 'query', schema: { type: 'string' } },
+          { name: 'limit', in: 'query', schema: { type: 'integer' } },
+          { name: 'skip', in: 'query', schema: { type: 'integer' } },
+        ],
+        responses: {
+          '200': { description: 'List of exercises' },
+        },
+      },
+    },
+    '/api/student/goals': {
+      post: {
+        summary: 'Create a goal',
+        tags: ['Student'],
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  studentId: { type: 'string' },
+                  title: { type: 'string' },
+                  description: { type: 'string' },
+                  type: { type: 'string', enum: ['exercises', 'time', 'streak', 'score', 'level'] },
+                  targetValue: { type: 'number' },
+                  unit: { type: 'string' },
+                  deadline: { type: 'string', format: 'date-time' },
+                },
+                required: ['studentId', 'title', 'type', 'targetValue', 'unit', 'deadline'],
+              },
+            },
+          },
+        },
+        responses: {
+          '201': { description: 'Goal created' },
+        },
+      },
+    },
+    '/api/student/goals/student/{studentId}': {
+      get: {
+        summary: 'Get goals for student',
+        tags: ['Student'],
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'studentId', in: 'path', required: true, schema: { type: 'string' } },
+          { name: 'status', in: 'query', schema: { type: 'string' } },
+        ],
+        responses: {
+          '200': { description: 'List of goals' },
+        },
+      },
+    },
+    '/api/student/assignments': {
+      post: {
+        summary: 'Create an assignment',
+        tags: ['Student'],
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  studentId: { type: 'string' },
+                  exerciseId: { type: 'string' },
+                  dueDate: { type: 'string', format: 'date-time' },
+                },
+                required: ['studentId', 'exerciseId'],
+              },
+            },
+          },
+        },
+        responses: {
+          '201': { description: 'Assignment created' },
+        },
+      },
+    },
+    '/api/student/assignments/student/{studentId}': {
+      get: {
+        summary: 'Get assignments for student',
+        tags: ['Student'],
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'studentId', in: 'path', required: true, schema: { type: 'string' } },
+          { name: 'status', in: 'query', schema: { type: 'string' } },
+        ],
+        responses: {
+          '200': { description: 'List of assignments' },
+        },
+      },
+    },
+
+    // ==========================================
+    // Guardian Service endpoints
+    // ==========================================
+    '/api/guardian/students': {
+      get: {
+        summary: 'Get all students for guardian',
+        tags: ['Guardian'],
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': { description: 'List of students with progress' },
+          '401': { description: 'Unauthorized' },
+          '403': { description: 'Forbidden - not a guardian role' },
+        },
+      },
+      post: {
+        summary: 'Create a new student',
+        tags: ['Guardian'],
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  email: { type: 'string', format: 'email' },
+                  firstName: { type: 'string' },
+                  lastName: { type: 'string' },
+                  password: { type: 'string' },
+                  targetGradeLevel: { type: 'string' },
+                  diagnosticEnabled: { type: 'boolean' },
+                },
+                required: ['email', 'firstName', 'lastName'],
+              },
+            },
+          },
+        },
+        responses: {
+          '201': { description: 'Student created' },
+          '400': { description: 'Validation error' },
+          '409': { description: 'Email already exists' },
+        },
+      },
+    },
+    '/api/guardian/students/{studentId}': {
+      get: {
+        summary: 'Get student detail',
+        tags: ['Guardian'],
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: 'studentId',
+            in: 'path',
+            required: true,
+            schema: { type: 'string' },
+          },
+        ],
+        responses: {
+          '200': { description: 'Student detail with progress, assessments, attempts' },
+          '403': { description: 'Student does not belong to guardian' },
+          '404': { description: 'Student not found' },
+        },
+      },
+      delete: {
+        summary: 'Unlink student from guardian',
+        tags: ['Guardian'],
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: 'studentId',
+            in: 'path',
+            required: true,
+            schema: { type: 'string' },
+          },
+        ],
+        responses: {
+          '200': { description: 'Student unlinked' },
+          '403': { description: 'Student does not belong to guardian' },
+          '404': { description: 'Student not found' },
+        },
+      },
+    },
+    '/api/guardian/students/link': {
+      post: {
+        summary: 'Link existing student by email',
+        tags: ['Guardian'],
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  studentEmail: { type: 'string', format: 'email' },
+                },
+                required: ['studentEmail'],
+              },
+            },
+          },
+        },
+        responses: {
+          '200': { description: 'Student linked' },
+          '404': { description: 'Student not found' },
+          '409': { description: 'Student already linked to another guardian' },
+        },
+      },
+    },
+    '/api/guardian/exercises': {
+      get: {
+        summary: 'Get exercises',
+        tags: ['Guardian'],
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'readingLevel', in: 'query', schema: { type: 'string' } },
+          { name: 'skillStrand', in: 'query', schema: { type: 'string' } },
+          { name: 'type', in: 'query', schema: { type: 'string' } },
+          { name: 'limit', in: 'query', schema: { type: 'integer' } },
+          { name: 'skip', in: 'query', schema: { type: 'integer' } },
+        ],
+        responses: {
+          '200': { description: 'List of exercises' },
+        },
+      },
+    },
+    '/api/guardian/students/{studentId}/assignments': {
+      post: {
+        summary: 'Assign exercise to student',
+        tags: ['Guardian'],
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: 'studentId',
+            in: 'path',
+            required: true,
+            schema: { type: 'string' },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  exerciseId: { type: 'string' },
+                  dueDate: { type: 'string', format: 'date-time' },
+                },
+                required: ['exerciseId'],
+              },
+            },
+          },
+        },
+        responses: {
+          '201': { description: 'Assignment created' },
+          '403': { description: 'Student does not belong to guardian' },
+          '409': { description: 'Assignment already exists' },
+        },
+      },
+    },
+    '/api/guardian/goals': {
+      post: {
+        summary: 'Create a goal for student',
+        tags: ['Guardian'],
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  studentId: { type: 'string' },
+                  title: { type: 'string' },
+                  description: { type: 'string' },
+                  type: { type: 'string', enum: ['exercises', 'time', 'streak', 'score', 'level'] },
+                  targetValue: { type: 'number' },
+                  unit: { type: 'string' },
+                  deadline: { type: 'string', format: 'date-time' },
+                },
+                required: ['studentId', 'title', 'type', 'targetValue', 'unit', 'deadline'],
+              },
+            },
+          },
+        },
+        responses: {
+          '201': { description: 'Goal created' },
+          '403': { description: 'Student does not belong to guardian' },
+        },
+      },
+    },
+    '/api/guardian/students/{studentId}/goals': {
+      get: {
+        summary: 'Get goals for student',
+        tags: ['Guardian'],
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { name: 'studentId', in: 'path', required: true, schema: { type: 'string' } },
+          { name: 'status', in: 'query', schema: { type: 'string', enum: ['active', 'completed', 'expired', 'cancelled'] } },
+          { name: 'limit', in: 'query', schema: { type: 'integer' } },
+          { name: 'skip', in: 'query', schema: { type: 'integer' } },
+        ],
+        responses: {
+          '200': { description: 'List of goals' },
+          '403': { description: 'Student does not belong to guardian' },
+        },
+      },
+    },
+    '/api/guardian/students/{studentId}/diagnostic': {
+      patch: {
+        summary: 'Update student diagnostic setting',
+        tags: ['Guardian'],
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: 'studentId',
+            in: 'path',
+            required: true,
+            schema: { type: 'string' },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  enabled: { type: 'boolean' },
+                },
+                required: ['enabled'],
+              },
+            },
+          },
+        },
+        responses: {
+          '200': { description: 'Diagnostic setting updated' },
+          '403': { description: 'Student does not belong to guardian' },
         },
       },
     },

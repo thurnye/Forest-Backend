@@ -4,14 +4,12 @@ import {
   login,
   refresh,
   logout,
-  verifyEmail,
-  resendVerification,
   requestPasswordReset,
   resetPassword,
   changePassword,
 } from '../controllers/Auth-Student-Controller';
 import { validate } from '@readingForest/libs';
-import { registerStudentSchema, loginSchema } from '../utils/validators';
+import { registerStudentSchema, studentLoginSchema } from '../utils/validators';
 
 const router = Router();
 
@@ -19,19 +17,13 @@ const router = Router();
 router.post('/register', validate(registerStudentSchema), register);
 
 // POST /login - Login user
-router.post('/login', validate(loginSchema), login);
+router.post('/login', validate(studentLoginSchema), login);
 
 // POST /refresh - Refresh access token
 router.post('/refresh', refresh);
 
 // POST /logout - Logout user
 router.post('/logout', logout);
-
-// POST /verify-email - Verify email address
-router.post('/verify-email', verifyEmail);
-
-// POST /resend-verification - Resend verification email
-router.post('/resend-verification', resendVerification);
 
 // POST /reset-request - Request password reset
 router.post('/reset-request', requestPasswordReset);

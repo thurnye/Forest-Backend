@@ -11,7 +11,7 @@ import {
   changePassword,
 } from '../controllers/Auth-Guardian-Controller';
 import { validate } from '@readingForest/libs';
-import { registerGuardianSchema, loginSchema } from '../utils/validators';
+import { registerGuardianSchema, GuardianLoginSchema } from '../utils/validators';
 
 const router = Router();
 
@@ -19,7 +19,7 @@ const router = Router();
 router.post('/register', validate(registerGuardianSchema), register);
 
 // POST /login - Login user
-router.post('/login', validate(loginSchema), login);
+router.post('/login', validate(GuardianLoginSchema), login);
 
 // POST /refresh - Refresh access token
 router.post('/refresh', refresh);

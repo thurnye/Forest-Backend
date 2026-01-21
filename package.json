@@ -9,16 +9,20 @@
     "libs"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev:gateway\" \"npm run dev:auth\" \"npm run dev:user\"",
+    "dev": "concurrently \"npm run dev:gateway\" \"npm run dev:auth\" \"npm run dev:user\" \"npm run dev:student\" \"npm run dev:guardian\"",
     "dev:gateway": "cd api-gateway && npm run dev",
     "dev:auth": "cd services/auth-service && npm run dev",
     "dev:user": "cd services/user-service && npm run dev",
+    "dev:student": "cd services/student-service && npm run dev",
+    "dev:guardian": "cd services/guardian-service && npm run dev",
     "build": "npm run build:libs && npm run build:gateway && npm run build:services",
     "build:libs": "cd libs && npm run build",
     "build:gateway": "cd api-gateway && npm run build",
-    "build:services": "npm run build:auth && npm run build:user",
+    "build:services": "npm run build:auth && npm run build:user && npm run build:student && npm run build:guardian",
     "build:auth": "cd services/auth-service && npm run build",
     "build:user": "cd services/user-service && npm run build",
+    "build:student": "cd services/student-service && npm run build",
+    "build:guardian": "cd services/guardian-service && npm run build",
     "pm2:start": "pm2 start ecosystem.config.js",
     "pm2:stop": "pm2 stop ecosystem.config.js",
     "pm2:restart": "pm2 restart ecosystem.config.js",
@@ -33,7 +37,8 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "pm2": "^5.3.0"
+    "pm2": "^5.3.0",
+    "unique-names-generator": "^4.7.1"
   },
   "engines": {
     "node": ">=18.0.0"

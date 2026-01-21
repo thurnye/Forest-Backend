@@ -1,2 +1,0 @@
-// swagger.ts
-export {};

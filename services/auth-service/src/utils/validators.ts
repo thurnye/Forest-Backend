@@ -13,20 +13,29 @@ export const registerGuardianSchema = Joi.object({
 });
 
 export const registerStudentSchema = Joi.object({
-  email: commonSchemas.email,
+  username: Joi.string().alphanum().min(3).max(30).optional().trim(),
   password: commonSchemas.password,
   firstName: Joi.string().optional().trim(),
   lastName: Joi.string().optional().trim(),
-  studentName: Joi.string().alphanum().min(3).max(30).optional().trim(),
   targetGradeLevel: Joi.string().trim().required(),
   diagnosticEnabled: Joi.boolean().optional(),
+  guardianId: Joi.string().required().trim(),
 });
 
 /**
  * Login validation schema
  */
-export const loginSchema = Joi.object({
+export const GuardianLoginSchema = Joi.object({
   email: commonSchemas.email,
+  password: Joi.string().required().messages({
+    'any.required': 'Password is required',
+  }),
+});
+
+export const studentLoginSchema = Joi.object({
+  username: Joi.string().required().messages({
+    'any.required': 'Username is required',
+  }),
   password: Joi.string().required().messages({
     'any.required': 'Password is required',
   }),

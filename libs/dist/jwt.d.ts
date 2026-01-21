@@ -1,6 +1,7 @@
 export interface TokenPayload {
     userId: string;
     email: string;
+    username?: string;
     role?: string;
 }
 export declare const signAccessToken: (payload: TokenPayload) => string;
