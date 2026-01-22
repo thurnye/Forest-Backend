@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const studentServiceClient_1 = require("../clients/studentServiceClient");
+const authServiceClient_1 = require("../clients/authServiceClient");
 const libs_1 = require("@readingForest/libs");
 const utils_1 = require("../utils");
 class GuardianService {
@@ -31,18 +32,17 @@ class GuardianService {
             (0, utils_1.handleApiError)(error, 'Failed to fetch student detail');
         }
     }
-    async createStudent(guardianId, data) {
+    async registerStudent(guardianId, data) {
         try {
-            const headers = (0, studentServiceClient_1.createGuardianHeaders)(guardianId);
             const studentData = {
                 ...data,
                 guardianId: guardianId,
             };
-            const response = await studentServiceClient_1.StudentServiceAPI.createStudent(studentData, headers);
+            const response = await authServiceClient_1.AuthServiceAPI.registerStudent(studentData);
             return response.data;
         }
         catch (error) {
-            (0, utils_1.handleApiError)(error, 'Failed to create student');
+            (0, utils_1.handleApiError)(error, 'Failed to register student');
         }
     }
     async linkStudentByEmail(guardianId, studentEmail) {

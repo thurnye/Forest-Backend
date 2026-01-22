@@ -2,6 +2,7 @@ import {
   StudentServiceAPI,
   createGuardianHeaders,
 } from '../clients/studentServiceClient';
+import { AuthServiceAPI } from '../clients/authServiceClient';
 import { Errors } from '@readingForest/libs';
 import { handleApiError } from '../utils';
 
@@ -53,32 +54,32 @@ class GuardianService {
   }
 
   /**
-   * Create a new student linked to guardian
+   * Register a new student linked to guardian via auth-service
    */
-  async createStudent(
+  async registerStudent(
     guardianId: string,
     data: {
-      email: string;
+      password: string;
       firstName: string;
       lastName: string;
+      username?: string;
+      avatar?: string;
+      dateOfBirth?: string;
+      grade?: string;
       targetGradeLevel?: string;
       diagnosticEnabled?: boolean;
     },
   ) {
     try {
-      const headers = createGuardianHeaders(guardianId);
       const studentData = {
         ...data,
         guardianId: guardianId,
       };
 
-      const response = await StudentServiceAPI.createStudent(
-        studentData,
-        headers,
-      );
+      const response = await AuthServiceAPI.registerStudent(studentData);
       return response.data;
     } catch (error) {
-      handleApiError(error, 'Failed to create student');
+      handleApiError(error, 'Failed to register student');
     }
   }
 

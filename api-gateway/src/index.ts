@@ -8,7 +8,7 @@ import config from './config';
 import corsMiddleware from './middleware/cors';
 import { requestId } from './middleware/requestId';
 import { errorHandler } from './middleware/errorHandler';
-import { defaultRateLimit } from './middleware/rateLimit';
+// import { defaultRateLimit } from './middleware/rateLimit';
 import { optionalAuth } from './middleware/auth';
 
 // Proxy routes
@@ -32,7 +32,7 @@ const PORT = config.PORT;
 app.use(helmet());
 app.use(corsMiddleware);
 app.use(requestId);
-app.use(defaultRateLimit);
+// app.use(defaultRateLimit);
 
 // --- Extract user from JWT token (optional) ---
 app.use(optionalAuth);

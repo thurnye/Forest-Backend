@@ -2,10 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const http_proxy_middleware_1 = require("http-proxy-middleware");
-const rateLimit_1 = require("../middleware/rateLimit");
 const router = (0, express_1.Router)();
 const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL;
-router.use('/', rateLimit_1.authRateLimit, (0, http_proxy_middleware_1.createProxyMiddleware)({
+router.use('/', (0, http_proxy_middleware_1.createProxyMiddleware)({
     target: AUTH_SERVICE_URL,
     changeOrigin: true,
     pathRewrite: {

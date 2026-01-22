@@ -3,7 +3,7 @@ import GuardianController from '../controllers/guardianController';
 import { guardianAuth, GuardianRequest } from '../middleware/guardianAuth';
 import { validateBody, validateParams, validateQuery } from '../middleware/validate';
 import {
-  createStudentSchema,
+  registerStudentSchema,
   linkStudentSchema,
   createAssignmentSchema,
   createGoalSchema,
@@ -32,11 +32,11 @@ router.get(
   (req, res, next) => GuardianController.getStudentDetail(req as GuardianRequest, res, next),
 );
 
-// POST /students - Create a new student
+// POST /students/register - Register a new student via auth-service
 router.post(
-  '/students',
-  validateBody(createStudentSchema),
-  (req, res, next) => GuardianController.createStudent(req as GuardianRequest, res, next),
+  '/students/register',
+  validateBody(registerStudentSchema),
+  (req, res, next) => GuardianController.registerStudent(req as GuardianRequest, res, next),
 );
 
 // POST /students/link - Link existing student by email

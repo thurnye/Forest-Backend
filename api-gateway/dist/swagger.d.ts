@@ -528,6 +528,8 @@ export declare const swaggerSpec: {
                     };
                 };
             };
+        };
+        '/api/guardian/students/register': {
             post: {
                 summary: string;
                 tags: string[];
@@ -541,9 +543,9 @@ export declare const swaggerSpec: {
                             schema: {
                                 type: string;
                                 properties: {
-                                    email: {
+                                    password: {
                                         type: string;
-                                        format: string;
+                                        minLength: number;
                                     };
                                     firstName: {
                                         type: string;
@@ -551,7 +553,17 @@ export declare const swaggerSpec: {
                                     lastName: {
                                         type: string;
                                     };
-                                    password: {
+                                    username: {
+                                        type: string;
+                                    };
+                                    avatar: {
+                                        type: string;
+                                    };
+                                    dateOfBirth: {
+                                        type: string;
+                                        format: string;
+                                    };
+                                    grade: {
                                         type: string;
                                     };
                                     targetGradeLevel: {

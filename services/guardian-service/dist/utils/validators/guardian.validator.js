@@ -3,13 +3,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.studentIdParamSchema = exports.goalQuerySchema = exports.exerciseQuerySchema = exports.updateDiagnosticSchema = exports.createGoalSchema = exports.createAssignmentSchema = exports.linkStudentSchema = exports.createStudentSchema = void 0;
+exports.studentIdParamSchema = exports.goalQuerySchema = exports.exerciseQuerySchema = exports.updateDiagnosticSchema = exports.createGoalSchema = exports.createAssignmentSchema = exports.linkStudentSchema = exports.registerStudentSchema = void 0;
 const joi_1 = __importDefault(require("joi"));
-exports.createStudentSchema = joi_1.default.object({
-    email: joi_1.default.string().email().required(),
+exports.registerStudentSchema = joi_1.default.object({
+    password: joi_1.default.string().min(6).required(),
     firstName: joi_1.default.string().required().trim(),
     lastName: joi_1.default.string().required().trim(),
-    password: joi_1.default.string().min(6),
+    username: joi_1.default.string().trim(),
+    avatar: joi_1.default.string(),
+    dateOfBirth: joi_1.default.date(),
+    grade: joi_1.default.string(),
     targetGradeLevel: joi_1.default.string(),
     diagnosticEnabled: joi_1.default.boolean().default(true),
 });

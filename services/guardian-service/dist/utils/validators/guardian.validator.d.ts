@@ -1,5 +1,5 @@
 import Joi from 'joi';
-export declare const createStudentSchema: Joi.ObjectSchema<any>;
+export declare const registerStudentSchema: Joi.ObjectSchema<any>;
 export declare const linkStudentSchema: Joi.ObjectSchema<any>;
 export declare const createAssignmentSchema: Joi.ObjectSchema<any>;
 export declare const createGoalSchema: Joi.ObjectSchema<any>;

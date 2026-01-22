@@ -12,7 +12,7 @@ const router = (0, express_1.Router)();
 router.use(guardianAuth_1.guardianAuth);
 router.get('/students', (req, res, next) => guardianController_1.default.getStudents(req, res, next));
 router.get('/students/:studentId', (0, validate_1.validateParams)(guardian_validator_1.studentIdParamSchema), (req, res, next) => guardianController_1.default.getStudentDetail(req, res, next));
-router.post('/students', (0, validate_1.validateBody)(guardian_validator_1.createStudentSchema), (req, res, next) => guardianController_1.default.createStudent(req, res, next));
+router.post('/students/register', (0, validate_1.validateBody)(guardian_validator_1.registerStudentSchema), (req, res, next) => guardianController_1.default.registerStudent(req, res, next));
 router.post('/students/link', (0, validate_1.validateBody)(guardian_validator_1.linkStudentSchema), (req, res, next) => guardianController_1.default.linkStudent(req, res, next));
 router.delete('/students/:studentId', (0, validate_1.validateParams)(guardian_validator_1.studentIdParamSchema), (req, res, next) => guardianController_1.default.unlinkStudent(req, res, next));
 router.get('/exercises', (0, validate_1.validateQuery)(guardian_validator_1.exerciseQuerySchema), (req, res, next) => guardianController_1.default.getExercises(req, res, next));

@@ -31,12 +31,12 @@ class GuardianController {
   }
 
   /**
-   * POST /students
-   * Create a new student
+   * POST /students/register
+   * Register a new student via auth-service
    */
-  async createStudent(req: GuardianRequest, res: Response, next: NextFunction) {
+  async registerStudent(req: GuardianRequest, res: Response, next: NextFunction) {
     try {
-      const student = await GuardianService.createStudent(req.guardianId, req.body);
+      const student = await GuardianService.registerStudent(req.guardianId, req.body);
       res.status(201).json(student);
     } catch (error) {
       next(error);

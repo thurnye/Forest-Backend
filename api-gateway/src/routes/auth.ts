@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { createProxyMiddleware, fixRequestBody } from 'http-proxy-middleware';
-import { authRateLimit } from '../middleware/rateLimit';
+// import { authRateLimit } from '../middleware/rateLimit';
 
 const router = Router();
 const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL!;
@@ -10,7 +10,7 @@ const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL!;
  */
 router.use(
   '/',
-  authRateLimit, // Apply strict rate limiting to auth endpoints
+  // authRateLimit, // Apply strict rate limiting to auth endpoints
   createProxyMiddleware({
     target: AUTH_SERVICE_URL,
     changeOrigin: true,

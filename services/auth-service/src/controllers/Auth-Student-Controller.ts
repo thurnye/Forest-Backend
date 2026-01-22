@@ -133,7 +133,8 @@ export const login = async (
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax', // 'lax' works for most cases including cross-origin POST
+      path: '/', // Cookie available for all paths
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -178,6 +179,8 @@ export const refresh = async (
 ): Promise<void> => {
   try {
     const { refreshToken } = req.cookies;
+    console.log('[Refresh] Cookies received:', req.cookies);
+    console.log('[Refresh] RefreshToken from cookie:', refreshToken ? 'present' : 'missing');
 
     if (!refreshToken) {
       fail(res, 'Refresh token not found', 401);
@@ -186,11 +189,16 @@ export const refresh = async (
 
     // Verify refresh token
     const payload = verifyRefresh(refreshToken);
+    console.log('[Refresh] Token payload:', payload);
 
     // Find student and check if refresh token exists in database
     const student = await Student.findById(payload.userId).select(
       '+refreshTokens',
     );
+    console.log('[Refresh] Student found:', student ? 'yes' : 'no');
+    console.log('[Refresh] Stored tokens count:', student?.refreshTokens?.length || 0);
+    console.log('[Refresh] Token in array:', student?.refreshTokens?.includes(refreshToken));
+
     if (!student || !student.refreshTokens.includes(refreshToken)) {
       fail(res, 'Invalid refresh token', 401);
       return;
@@ -216,7 +224,8 @@ export const refresh = async (
     res.cookie('refreshToken', newRefreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax',
+      path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -277,13 +286,13 @@ export const logout = async (
     }
 
     // Clear cookie
-    res.clearCookie('refreshToken');
+    res.clearCookie('refreshToken', { path: '/' });
 
     success(res, null, 'Logout successful');
   } catch (error) {
     logger.error('Logout error', { error });
     // Even if there's an error, clear the cookie
-    res.clearCookie('refreshToken');
+    res.clearCookie('refreshToken', { path: '/' });
     success(res, null, 'Logout successful');
   }
 };

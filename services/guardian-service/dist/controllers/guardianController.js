@@ -24,9 +24,9 @@ class GuardianController {
             next(error);
         }
     }
-    async createStudent(req, res, next) {
+    async registerStudent(req, res, next) {
         try {
-            const student = await guardianService_1.default.createStudent(req.guardianId, req.body);
+            const student = await guardianService_1.default.registerStudent(req.guardianId, req.body);
             res.status(201).json(student);
         }
         catch (error) {

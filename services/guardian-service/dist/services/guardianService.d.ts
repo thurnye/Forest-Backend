@@ -1,10 +1,14 @@
 declare class GuardianService {
     getStudents(guardianId: string): Promise<any>;
     getStudentDetail(guardianId: string, studentId: string): Promise<any>;
-    createStudent(guardianId: string, data: {
-        email: string;
+    registerStudent(guardianId: string, data: {
+        password: string;
         firstName: string;
         lastName: string;
+        username?: string;
+        avatar?: string;
+        dateOfBirth?: string;
+        grade?: string;
         targetGradeLevel?: string;
         diagnosticEnabled?: boolean;
     }): Promise<any>;

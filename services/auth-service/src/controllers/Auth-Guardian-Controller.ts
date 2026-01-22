@@ -124,7 +124,8 @@ export const login = async (
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax',
+      path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -199,7 +200,8 @@ export const refresh = async (
     res.cookie('refreshToken', newRefreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax',
+      path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -254,13 +256,13 @@ export const logout = async (
     }
 
     // Clear cookie
-    res.clearCookie('refreshToken');
+    res.clearCookie('refreshToken', { path: '/' });
 
     success(res, null, 'Logout successful');
   } catch (error) {
     logger.error('Logout error', { error });
     // Even if there's an error, clear the cookie
-    res.clearCookie('refreshToken');
+    res.clearCookie('refreshToken', { path: '/' });
     success(res, null, 'Logout successful');
   }
 };

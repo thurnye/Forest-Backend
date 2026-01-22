@@ -21,7 +21,7 @@ export const corsOptions = {
   credentials: true,
   optionsSuccessStatus: 200,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-access-token', 'x-request-id', 'x-device-fingerprint', 'x-bot-score'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-access-token', 'x-request-id', 'x-device-fingerprint', 'x-bot-score', 'x-bot-fingerprint', 'x-bot-likely',],
   exposedHeaders: ['x-access-token', 'x-request-id'],
 };
 

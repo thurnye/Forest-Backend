@@ -380,8 +380,10 @@ export const swaggerSpec = {
           '403': { description: 'Forbidden - not a guardian role' },
         },
       },
+    },
+    '/api/guardian/students/register': {
       post: {
-        summary: 'Create a new student',
+        summary: 'Register a new student (via auth-service)',
         tags: ['Guardian'],
         security: [{ bearerAuth: [] }],
         requestBody: {
@@ -391,22 +393,25 @@ export const swaggerSpec = {
               schema: {
                 type: 'object',
                 properties: {
-                  email: { type: 'string', format: 'email' },
+                  password: { type: 'string', minLength: 6 },
                   firstName: { type: 'string' },
                   lastName: { type: 'string' },
-                  password: { type: 'string' },
+                  username: { type: 'string' },
+                  avatar: { type: 'string' },
+                  dateOfBirth: { type: 'string', format: 'date' },
+                  grade: { type: 'string' },
                   targetGradeLevel: { type: 'string' },
                   diagnosticEnabled: { type: 'boolean' },
                 },
-                required: ['email', 'firstName', 'lastName'],
+                required: ['password', 'firstName', 'lastName'],
               },
             },
           },
         },
         responses: {
-          '201': { description: 'Student created' },
+          '201': { description: 'Student registered successfully' },
           '400': { description: 'Validation error' },
-          '409': { description: 'Email already exists' },
+          '409': { description: 'Username already exists' },
         },
       },
     },

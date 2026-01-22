@@ -1,10 +1,13 @@
 import Joi from 'joi';
 
-export const createStudentSchema = Joi.object({
-  email: Joi.string().email().required(),
+export const registerStudentSchema = Joi.object({
+  password: Joi.string().min(6).required(),
   firstName: Joi.string().required().trim(),
   lastName: Joi.string().required().trim(),
-  password: Joi.string().min(6),
+  username: Joi.string().trim(),
+  avatar: Joi.string(),
+  dateOfBirth: Joi.date(),
+  grade: Joi.string(),
   targetGradeLevel: Joi.string(),
   diagnosticEnabled: Joi.boolean().default(true),
 });
