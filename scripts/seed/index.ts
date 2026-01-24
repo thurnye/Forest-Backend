@@ -15,196 +15,243 @@ const MONGODB_URI =
   process.env.MONGODB_URI || 'mongodb://localhost:27017/ReadingForest';
 
 /**
- * User model (minimal for seeding)
+ * Guardian Schema (matches auth-service Guardian model)
  */
-const GuardianSchema = new mongoose.Schema({
-  email: String,
-  password: String,
-  firstName: String,
-  lastName: String,
-  username: String,
-  bio: String,
-  role: String,
-  reputation: Number,
-  isEmailVerified: Boolean,
-});
-const StudentSchema = new mongoose.Schema({
-  email: String,
-  password: String,
-  firstName: String,
-  lastName: String,
-  username: String,
-  bio: String,
-  role: String,
-  reputation: Number,
-  isEmailVerified: Boolean,
-  readingLevel: String,
-  targetGradeLevel: mongoose.Schema.Types.Mixed,
-  hasCompletedDiagnostic: Boolean,
-  diagnosticEnabled: Boolean,
-  guardian: mongoose.Types.ObjectId,
-});
+const GuardianSchema = new mongoose.Schema(
+  {
+    email: { type: String, required: true, unique: true, lowercase: true },
+    password: { type: String, required: true },
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    role: { type: String, enum: ['parent', 'teacher'], default: 'parent' },
+    isEmailVerified: { type: Boolean, default: false },
+    refreshTokens: { type: [String], default: [] },
+    isActive: { type: Boolean, default: true },
+  },
+  { timestamps: true },
+);
+
+/**
+ * Student Schema (matches auth-service Student model)
+ */
+const StudentSchema = new mongoose.Schema(
+  {
+    guardianId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Guardian' },
+    password: { type: String, required: true },
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    username: { type: String, unique: true, required: true },
+    avatar: { type: String },
+    dateOfBirth: { type: Date },
+    grade: { type: String },
+    readingLevel: { type: String, default: 'pre-k' },
+    targetGradeLevel: { type: String, default: 'grade-1' },
+    hasCompletedDiagnostic: { type: Boolean, default: false },
+    diagnosticEnabled: { type: Boolean, default: true },
+    refreshTokens: { type: [String], default: [] },
+    isActive: { type: Boolean, default: true },
+  },
+  { timestamps: true },
+);
+
+/**
+ * StudentProgress Schema (matches student-service StudentProgress model)
+ */
+const StudentProgressSchema = new mongoose.Schema(
+  {
+    studentId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Student' },
+    currentLevel: { type: String, default: 'pre-k' },
+    exercisesCompleted: { type: Number, default: 0 },
+    totalExercises: { type: Number, default: 0 },
+    averageScore: { type: Number, default: 0 },
+    streakDays: { type: Number, default: 0 },
+    lastActivityAt: { type: Date },
+  },
+  { timestamps: true },
+);
 
 const Student = mongoose.model('Student', StudentSchema);
 const Guardian = mongoose.model('Guardian', GuardianSchema);
+const StudentProgress = mongoose.model('StudentProgress', StudentProgressSchema);
 
 /**
- * Sample users to seed
+ * Generate username from first and last name
+ */
+function generateUsername(firstName: string, lastName: string, index: number): string {
+  const base = `${firstName.toLowerCase()}${lastName.toLowerCase().charAt(0)}`;
+  return `${base}${index + 1}`;
+}
+
+/**
+ * Sample guardians to seed
+ */
+const sampleGuardians = [
+  {
+    email: 'parent@gmail.com',
+    password: 'Password123!',
+    firstName: 'Parent',
+    lastName: 'Test',
+    role: 'parent',
+    isEmailVerified: true,
+  },
+  {
+    email: 'teacher@readingforest.com',
+    password: 'Teacher123!',
+    firstName: 'Teacher',
+    lastName: 'Smith',
+    role: 'teacher',
+    isEmailVerified: true,
+  },
+];
+
+/**
+ * Sample students to seed (guardianId will be set after guardians are created)
  */
 const sampleStudents = [
-
   {
-    // email: 'john.doe@example.com',
     password: 'Password123',
     firstName: 'John',
     lastName: 'Doe',
-    username: 'johndoe',
-    bio: 'Food enthusiast and home chef',
-    role: 'student',
-    reputation: 100,
+    avatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=john',
+    grade: 'grade-1',
     readingLevel: 'grade-1',
     targetGradeLevel: 'grade-1',
+    dateOfBirth: new Date('2018-03-15'),
     hasCompletedDiagnostic: true,
     diagnosticEnabled: false,
-    guardian: new mongoose.Types.ObjectId(),
   },
   {
     password: 'Password123',
     firstName: 'Jane',
     lastName: 'Smith',
-    username: 'janesmith',
-    bio: 'Professional chef and recipe creator',
-    role: 'student',
-    reputation: 250,
-    readingLevel: 'grade-1',
-    targetGradeLevel: 'grade-1',
-    hasCompletedDiagnostic: true,
-    diagnosticEnabled: false,
-    guardian: new mongoose.Types.ObjectId(),
-    
+    avatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=jane',
+    grade: 'grade-2',
+    readingLevel: 'pre-k',
+    targetGradeLevel: 'grade-2',
+    dateOfBirth: new Date('2017-07-22'),
+    hasCompletedDiagnostic: false,
+    diagnosticEnabled: true,
   },
   {
     password: 'Password123',
-    firstName: 'Gordon',
-    lastName: 'Chef',
-    username: 'chefgordon',
-    bio: 'Master chef with 20 years of experience',
-    role: 'student',
-    reputation: 1000,
-    readingLevel: 'grade-1',
+    firstName: 'Alex',
+    lastName: 'Johnson',
+    avatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=alex',
+    grade: 'kindergarten',
+    readingLevel: 'pre-k',
     targetGradeLevel: 'grade-1',
-    hasCompletedDiagnostic: true,
-    diagnosticEnabled: false,
-    guardian: new mongoose.Types.ObjectId(),
-    
+    dateOfBirth: new Date('2019-11-08'),
+    hasCompletedDiagnostic: false,
+    diagnosticEnabled: true,
   },
   {
-    // email: 'baker.mary@example.com',
     password: 'Password123',
-    firstName: 'Mary',
-    lastName: 'Baker',
-    username: 'marybaker',
-    bio: 'Pastry chef and baking expert',
-    role: 'student',
-    reputation: 350,
-    readingLevel: 'grade-1',
-    targetGradeLevel: 'grade-1',
+    firstName: 'Emma',
+    lastName: 'Wilson',
+    avatar: 'https://api.dicebear.com/7.x/adventurer/svg?seed=emma',
+    grade: 'grade-3',
+    readingLevel: 'grade-2',
+    targetGradeLevel: 'grade-3',
+    dateOfBirth: new Date('2016-05-30'),
     hasCompletedDiagnostic: true,
     diagnosticEnabled: false,
-    guardian: new mongoose.Types.ObjectId(),
   },
 ];
 
-const sampleGuardians = [
-    {
-    email: 'parent@gmail.com',
-    password: 'Password123!',
-    firstName: 'Parent',
-    lastName: 'Test',
-    username: 'parent-user',
-    bio: 'Food enthusiast and home chef',
-    role: 'parent',
-    reputation: 100,
-    isEmailVerified: true,
-    
-  },
-  {
-    email: 'Admin@readingForest.com',
-    password: 'AdminPass123',
-    firstName: 'Admin',
-    lastName: 'User',
-    username: 'admin',
-    bio: 'Platform administrator',
-    role: 'teacher',
-    reputation: 500,
-    isEmailVerified: true,
-  }
-]
-
 /**
- * Seed database with users
+ * Seed database with guardians, students, and progress records
  */
 async function seedDatabase() {
   try {
-    // console.log('🌱 Starting database seed...');
+    console.log('🌱 Starting database seed...');
 
     // Connect to MongoDB
     await mongoose.connect(MONGODB_URI);
-    // console.log('✅ Connected to MongoDB');
+    console.log('✅ Connected to MongoDB');
 
-    // Clear existing users (optional - be careful in production!)
+    // Clear existing data if CLEAR_DB is set
     const shouldClear = process.env.CLEAR_DB === 'true';
     if (shouldClear) {
+      console.log('🗑️  Clearing existing data...');
       await Student.deleteMany({});
-      // console.log('🗑️  Cleared existing users');
+      await Guardian.deleteMany({});
+      await StudentProgress.deleteMany({});
+      console.log('✅ Cleared existing data');
     }
 
-    // Hash passwords and create users
-    // console.log('👤 Creating users...');
+    // Create guardians
+    console.log('👤 Creating guardians...');
     const guardiansToCreate = await Promise.all(
-      sampleGuardians.map(async (user) => ({
-        ...user,
-        password: await bcrypt.hash(user.password, 10),
-      })),
-    );
-    const studentsToCreate = await Promise.all(
-      sampleStudents.map(async (user) => ({
-        ...user,
-        password: await bcrypt.hash(user.password, 10),
+      sampleGuardians.map(async (guardian) => ({
+        ...guardian,
+        password: await bcrypt.hash(guardian.password, 10),
       })),
     );
 
     const createdGuardians = await Guardian.insertMany(guardiansToCreate);
+    console.log(`✅ Created ${createdGuardians.length} guardians`);
 
-    const firstGuardianId = createdGuardians[0]._id;
-    studentsToCreate.forEach((student) => {
-      student.guardian = firstGuardianId;
+    // Get the first guardian's ID to link students
+    const primaryGuardianId = createdGuardians[0]._id;
+
+    // Create students with usernames and guardianId
+    console.log('👦 Creating students...');
+    const studentsToCreate = await Promise.all(
+      sampleStudents.map(async (student, index) => ({
+        ...student,
+        username: generateUsername(student.firstName, student.lastName, index),
+        password: await bcrypt.hash(student.password, 10),
+        guardianId: primaryGuardianId,
+      })),
+    );
+
+    const createdStudents = await Student.insertMany(studentsToCreate);
+    console.log(`✅ Created ${createdStudents.length} students`);
+
+    // Create initial progress records for each student
+    console.log('📊 Creating student progress records...');
+    const progressRecords = createdStudents.map((student) => ({
+      studentId: student._id,
+      currentLevel: student.grade || 'pre-k',
+      exercisesCompleted: 0,
+      totalExercises: 0,
+      averageScore: 0,
+      streakDays: 0,
+    }));
+
+    const createdProgress = await StudentProgress.insertMany(progressRecords);
+    console.log(`✅ Created ${createdProgress.length} progress records`);
+
+    // Log summary
+    console.log('\n📋 Seeded Data Summary:');
+    console.log('─'.repeat(50));
+
+    console.log('\nGuardians:');
+    createdGuardians.forEach((guardian) => {
+      console.log(`  📧 ${guardian.email} (${guardian.role})`);
     });
 
-    await Student.insertMany(studentsToCreate);
-    // console.log(`✅ Created ${createdUsers.length} users`);
-
-    // Log created users (without passwords)
-    // console.log('\n📋 Created Users:');
-    // createdGuardians.forEach((guardian) => {
-    //   // console.log(`  - ${user.email} (${user.username}) - Role: ${user.role}`);
-    // });
-    // createdStudents.forEach((user) => {
-    //   // console.log(`  - ${user.email} (${user.username}) - Role: ${user.role}`);
-    // });
+    console.log('\nStudents (linked to parent@gmail.com):');
+    createdStudents.forEach((student: any) => {
+      console.log(`  👤 ${student.firstName} ${student.lastName} (@${student.username}) - Grade: ${student.grade}`);
+    });
 
     console.log('\n✨ Database seeding completed successfully!');
-    // console.log('\n📝 Test Credentials:');
-    // console.log('  Email: john.doe@example.com');
+    console.log('\n📝 Test Credentials:');
+    console.log('─'.repeat(50));
+    console.log('Guardian Login:');
+    console.log('  Email: parent@gmail.com');
+    console.log('  Password: Password123!');
+    console.log('\nStudent Login:');
+    console.log('  Username: johnd1');
     console.log('  Password: Password123');
-    // console.log('\n  Email: admin@readingForest.com');
-    // console.log('  Password: AdminPass123');
+
   } catch (error) {
     console.error('❌ Error seeding database:', error);
     process.exit(1);
   } finally {
     await mongoose.connection.close();
-    // console.log('\n👋 Disconnected from MongoDB');
+    console.log('\n👋 Disconnected from MongoDB');
     process.exit(0);
   }
 }

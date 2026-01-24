@@ -1,7 +1,41 @@
 import mongoose from 'mongoose';
-import { StudentProgress } from '../db/models';
-
+import { Student, StudentProgress } from '../db/models';
 class ProgressService {
+  /**
+   * Create initial progress record for a new student
+   */
+  async createInitialProgress(studentId: string) {
+    console.log('[ProgressService] createInitialProgress called with studentId:', studentId);
+    // Ensure student exists
+    const student = await Student.findById(studentId);
+    if (!student) {
+      throw new Error('Student not found');
+    }
+    // Check if progress already exists
+    const existing = await StudentProgress.findOne({
+      studentId: new mongoose.Types.ObjectId(studentId),
+    });
+
+    if (existing) {
+      console.log('[ProgressService] Progress already exists for studentId:', studentId);
+      return existing;
+    }
+
+    // Create new progress record with defaults
+    const progress = await StudentProgress.create({
+      studentId: new mongoose.Types.ObjectId(studentId),
+      currentLevel: student.grade || 'pre-k',
+      exercisesCompleted: 0,
+      totalExercises: 0,
+      averageScore: 0,
+      streakDays: 0,
+    });
+
+    console.log('[ProgressService] Created initial progress for studentId:', studentId);
+
+    return progress;
+  }
+
   /**
    * Get progress for a student
    */

@@ -19,6 +19,7 @@ export const registerStudentSchema = Joi.object({
   lastName: Joi.string().optional().trim(),
   targetGradeLevel: Joi.string().trim().required(),
   diagnosticEnabled: Joi.boolean().optional(),
+  grade: Joi.string().required().trim(),
   guardianId: Joi.string().required().trim(),
 });
 

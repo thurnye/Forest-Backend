@@ -17,7 +17,7 @@ router.get('/lookup', StudentController.lookupByEmail);
 router.get(
   '/guardian/:guardianId',
   validateParams(guardianIdSchema),
-  StudentController.getStudentsByParent,
+  StudentController.getStudentsByGuardian,
 );
 
 // GET /students/:id/verify-ownership - Verify student belongs to guardian

@@ -47,7 +47,9 @@ exports.authServiceClient.interceptors.response.use((response) => {
     return Promise.reject(error);
 });
 exports.AuthServiceAPI = {
-    registerStudent: (data) => exports.authServiceClient.post('/auth/students/register', data),
+    registerStudent: (data) => {
+        return exports.authServiceClient.post('/student/register', data);
+    },
 };
 exports.default = exports.AuthServiceAPI;
 //# sourceMappingURL=authServiceClient.js.map

@@ -18,6 +18,7 @@ export declare const StudentServiceAPI: {
     getGoalsByStudent: (studentId: string, params: Record<string, unknown>, headers: Record<string, string>) => Promise<import("axios").AxiosResponse<any, any, {}>>;
     createAssignment: (data: Record<string, unknown>, headers: Record<string, string>) => Promise<import("axios").AxiosResponse<any, any, {}>>;
     getAssignmentsByStudent: (studentId: string, params: Record<string, unknown>, headers: Record<string, string>) => Promise<import("axios").AxiosResponse<any, any, {}>>;
+    createInitialProgress: (studentId: string, headers: Record<string, string>) => Promise<import("axios").AxiosResponse<any, any, {}>>;
 };
 export default StudentServiceAPI;
 //# sourceMappingURL=studentServiceClient.d.ts.map

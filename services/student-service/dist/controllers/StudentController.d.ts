@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 declare class StudentController {
     getStudentDetail(req: Request, res: Response, next: NextFunction): Promise<void>;
-    getStudentsByParent(req: Request, res: Response, next: NextFunction): Promise<void>;
+    getStudentsByGuardian(req: Request, res: Response, next: NextFunction): Promise<void>;
     createStudent(req: Request, res: Response, next: NextFunction): Promise<void>;
     updateStudent(req: Request, res: Response, next: NextFunction): Promise<void>;
     deleteStudent(req: Request, res: Response, next: NextFunction): Promise<void>;

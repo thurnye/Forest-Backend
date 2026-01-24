@@ -68,13 +68,14 @@ const login = async (req, res, _next) => {
             (0, libs_1.fail)(res, 'Invalid username or password', 401);
             return;
         }
-        const { accessToken, refreshToken } = (0, token_1.generateTokens)(student._id.toString(), '', student.username);
+        const { accessToken, refreshToken } = (0, token_1.generateTokens)(student._id.toString(), '', student.username, 'STUDENT');
         student.refreshTokens.push(refreshToken);
         await student.save();
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            sameSite: 'lax',
+            path: '/',
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
         res.setHeader('x-access-token', accessToken);
@@ -105,24 +106,31 @@ exports.login = login;
 const refresh = async (req, res, _next) => {
     try {
         const { refreshToken } = req.cookies;
+        console.log('[Refresh] Cookies received:', req.cookies);
+        console.log('[Refresh] RefreshToken from cookie:', refreshToken ? 'present' : 'missing');
         if (!refreshToken) {
             (0, libs_1.fail)(res, 'Refresh token not found', 401);
             return;
         }
         const payload = (0, token_1.verifyRefresh)(refreshToken);
+        console.log('[Refresh] Token payload:', payload);
         const student = await Student_1.default.findById(payload.userId).select('+refreshTokens');
+        console.log('[Refresh] Student found:', student ? 'yes' : 'no');
+        console.log('[Refresh] Stored tokens count:', student?.refreshTokens?.length || 0);
+        console.log('[Refresh] Token in array:', student?.refreshTokens?.includes(refreshToken));
         if (!student || !student.refreshTokens.includes(refreshToken)) {
             (0, libs_1.fail)(res, 'Invalid refresh token', 401);
             return;
         }
         student.refreshTokens = student.refreshTokens.filter((token) => token !== refreshToken);
-        const { accessToken, refreshToken: newRefreshToken } = (0, token_1.generateTokens)(student._id.toString(), '', student.username);
+        const { accessToken, refreshToken: newRefreshToken } = (0, token_1.generateTokens)(student._id.toString(), '', student.username, 'STUDENT');
         student.refreshTokens.push(newRefreshToken);
         await student.save();
         res.cookie('refreshToken', newRefreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            sameSite: 'lax',
+            path: '/',
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
         res.setHeader('x-access-token', accessToken);
@@ -159,12 +167,12 @@ const logout = async (req, res, _next) => {
                 libs_1.logger.info('Student logged out', { studentId: student._id });
             }
         }
-        res.clearCookie('refreshToken');
+        res.clearCookie('refreshToken', { path: '/' });
         (0, libs_1.success)(res, null, 'Logout successful');
     }
     catch (error) {
         libs_1.logger.error('Logout error', { error });
-        res.clearCookie('refreshToken');
+        res.clearCookie('refreshToken', { path: '/' });
         (0, libs_1.success)(res, null, 'Logout successful');
     }
 };

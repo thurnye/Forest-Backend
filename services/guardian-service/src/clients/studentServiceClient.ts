@@ -108,6 +108,10 @@ export const StudentServiceAPI = {
 
   getAssignmentsByStudent: (studentId: string, params: Record<string, unknown>, headers: Record<string, string>) =>
     studentServiceClient.get(`/assignments/student/${studentId}`, { params, headers }),
+
+  // Progress
+  createInitialProgress: (studentId: string, headers: Record<string, string>) =>
+    studentServiceClient.post(`/progress/${studentId}/init`, {}, { headers }),
 };
 
 export default StudentServiceAPI;

@@ -65,6 +65,7 @@ exports.StudentServiceAPI = {
     getGoalsByStudent: (studentId, params, headers) => exports.studentServiceClient.get(`/goals/student/${studentId}`, { params, headers }),
     createAssignment: (data, headers) => exports.studentServiceClient.post('/assignments', data, { headers }),
     getAssignmentsByStudent: (studentId, params, headers) => exports.studentServiceClient.get(`/assignments/student/${studentId}`, { params, headers }),
+    createInitialProgress: (studentId, headers) => exports.studentServiceClient.post(`/progress/${studentId}/init`, {}, { headers }),
 };
 exports.default = exports.StudentServiceAPI;
 //# sourceMappingURL=studentServiceClient.js.map

@@ -6,6 +6,26 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const models_1 = require("../db/models");
 class ProgressService {
+    async createInitialProgress(studentId) {
+        console.log('[ProgressService] createInitialProgress called with studentId:', studentId);
+        const existing = await models_1.StudentProgress.findOne({
+            studentId: new mongoose_1.default.Types.ObjectId(studentId),
+        });
+        if (existing) {
+            console.log('[ProgressService] Progress already exists for studentId:', studentId);
+            return existing;
+        }
+        const progress = await models_1.StudentProgress.create({
+            studentId: new mongoose_1.default.Types.ObjectId(studentId),
+            currentLevel: 'pre-k',
+            exercisesCompleted: 0,
+            totalExercises: 0,
+            averageScore: 0,
+            streakDays: 0,
+        });
+        console.log('[ProgressService] Created initial progress for studentId:', studentId);
+        return progress;
+    }
     async getProgressByStudentId(studentId) {
         const progress = await models_1.StudentProgress.findOne({
             studentId: new mongoose_1.default.Types.ObjectId(studentId),

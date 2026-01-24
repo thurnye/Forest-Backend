@@ -1,7 +1,22 @@
 import { Request, Response, NextFunction } from 'express';
 import { ProgressService } from '../services';
+import { success } from '@readingForest/libs';
 
 class ProgressController {
+  /**
+   * POST /progress/:studentId/init
+   * Create initial progress for a new student
+   */
+  async createInitialProgress(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { studentId } = req.params;
+      const progress = await ProgressService.createInitialProgress(studentId);
+      success(res, progress, 'Initial progress created successfully', undefined, 201);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   /**
    * GET /progress/:studentId
    * Get progress for a student

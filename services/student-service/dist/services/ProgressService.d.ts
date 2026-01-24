@@ -1,5 +1,10 @@
 import mongoose from 'mongoose';
 declare class ProgressService {
+    createInitialProgress(studentId: string): Promise<mongoose.Document<unknown, {}, import("../db/models").IStudentProgress, {}, {}> & import("../db/models").IStudentProgress & Required<{
+        _id: mongoose.Types.ObjectId;
+    }> & {
+        __v: number;
+    }>;
     getProgressByStudentId(studentId: string): Promise<(mongoose.Document<unknown, {}, import("../db/models").IStudentProgress, {}, {}> & import("../db/models").IStudentProgress & Required<{
         _id: mongoose.Types.ObjectId;
     }> & {

@@ -116,7 +116,7 @@ export const swaggerSpec = {
               schema: {
                 type: 'object',
                 properties: {
-                  username: { type: 'string', format: 'email' },
+                  username: { type: 'string', },
                   password: { type: 'string', minLength: 8 },
                   firstName: { type: 'string' },
                   lastName: { type: 'string' },
@@ -125,7 +125,7 @@ export const swaggerSpec = {
                   diagnosticEnabled: { type: 'boolean' },
                   guardianId: { type: 'string' },
                 },
-                required: ['email', 'password', 'firstName', 'lastName'],
+                required: ['password', 'firstName', 'lastName'],
               },
             },
           },

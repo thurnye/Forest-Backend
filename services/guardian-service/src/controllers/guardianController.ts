@@ -1,6 +1,7 @@
 import { Response, NextFunction } from 'express';
 import { GuardianRequest } from '../middleware/guardianAuth';
 import GuardianService from '../services/guardianService';
+import { success } from '@readingForest/libs';
 
 class GuardianController {
   /**
@@ -10,7 +11,7 @@ class GuardianController {
   async getStudents(req: GuardianRequest, res: Response, next: NextFunction) {
     try {
       const students = await GuardianService.getStudents(req.guardianId);
-      res.json(students);
+      success(res, students, 'Students fetched successfully');
     } catch (error) {
       next(error);
     }
@@ -24,7 +25,7 @@ class GuardianController {
     try {
       const { studentId } = req.params;
       const student = await GuardianService.getStudentDetail(req.guardianId, studentId);
-      res.json(student);
+      success(res, student, 'Student detail fetched successfully');
     } catch (error) {
       next(error);
     }
@@ -37,7 +38,7 @@ class GuardianController {
   async registerStudent(req: GuardianRequest, res: Response, next: NextFunction) {
     try {
       const student = await GuardianService.registerStudent(req.guardianId, req.body);
-      res.status(201).json(student);
+      success(res, student, 'Student registered successfully', undefined, 201);
     } catch (error) {
       next(error);
     }
@@ -51,7 +52,7 @@ class GuardianController {
     try {
       const { studentEmail } = req.body;
       const student = await GuardianService.linkStudentByEmail(req.guardianId, studentEmail);
-      res.json(student);
+      success(res, student, 'Student linked successfully');
     } catch (error) {
       next(error);
     }
@@ -65,7 +66,7 @@ class GuardianController {
     try {
       const { studentId } = req.params;
       const result = await GuardianService.unlinkStudent(req.guardianId, studentId);
-      res.json({ success: true, data: result });
+      success(res, result, 'Student unlinked successfully');
     } catch (error) {
       next(error);
     }
@@ -85,7 +86,7 @@ class GuardianController {
         limit: limit ? parseInt(limit as string, 10) : undefined,
         skip: skip ? parseInt(skip as string, 10) : undefined,
       });
-      res.json(exercises);
+      success(res, exercises, 'Exercises fetched successfully');
     } catch (error) {
       next(error);
     }
@@ -105,7 +106,7 @@ class GuardianController {
         exerciseId,
         dueDate ? new Date(dueDate) : undefined,
       );
-      res.status(201).json(assignment);
+      success(res, assignment, 'Assignment created successfully', undefined, 201);
     } catch (error) {
       next(error);
     }
@@ -121,7 +122,7 @@ class GuardianController {
         ...req.body,
         deadline: new Date(req.body.deadline),
       });
-      res.status(201).json(goal);
+      success(res, goal, 'Goal created successfully', undefined, 201);
     } catch (error) {
       next(error);
     }
@@ -140,7 +141,7 @@ class GuardianController {
         limit: limit ? parseInt(limit as string, 10) : undefined,
         skip: skip ? parseInt(skip as string, 10) : undefined,
       });
-      res.json(goals);
+      success(res, goals, 'Goals fetched successfully');
     } catch (error) {
       next(error);
     }
@@ -159,7 +160,7 @@ class GuardianController {
         studentId,
         enabled,
       );
-      res.json(student);
+      success(res, student, 'Diagnostic setting updated successfully');
     } catch (error) {
       next(error);
     }

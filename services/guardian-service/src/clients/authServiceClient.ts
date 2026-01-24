@@ -61,6 +61,7 @@ export const AuthServiceAPI = {
   /**
    * Register a new student via auth-service
    */
+  
   registerStudent: (data: {
     password: string;
     firstName: string;
@@ -72,7 +73,9 @@ export const AuthServiceAPI = {
     targetGradeLevel?: string;
     diagnosticEnabled?: boolean;
     guardianId: string;
-  }) => authServiceClient.post('/auth/students/register', data),
+  }) => {
+    return authServiceClient.post('/student/register', data);
+  },
 };
 
 export default AuthServiceAPI;

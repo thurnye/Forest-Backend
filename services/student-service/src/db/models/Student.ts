@@ -9,7 +9,7 @@ export interface IStudent extends Document {
   username?: string;
   avatar?: string;
   dateOfBirth?: Date;
-  grade?: string;
+  grade: string;
   readingLevel: string;
   targetGradeLevel: string;
   hasCompletedDiagnostic: boolean;
@@ -57,6 +57,8 @@ const StudentSchema = new Schema<IStudent>(
     },
     grade: {
       type: String,
+      default: 'pre-k',
+      required: true,
     },
     readingLevel: {
       type: String,

@@ -16,7 +16,7 @@ const guardianAuth = (req, res, next) => {
     if (!ALLOWED_ROLES.includes(normalizedRole)) {
         res.status(403).json({
             success: false,
-            error: 'Forbidden: Only parents and teachers can access this resource',
+            error: 'Forbidden: Only guardians can access this resource',
         });
         return;
     }

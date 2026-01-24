@@ -77,7 +77,24 @@ class GuardianService {
       };
 
       const response = await AuthServiceAPI.registerStudent(studentData);
-      return response.data;
+      const studentData2 = response.data?.data || response.data;
+
+      // Create initial progress record for the new student
+      if (studentData2?.id) {
+        const headers = createGuardianHeaders(guardianId);
+        try {
+          console.log('[GuardianService] Creating initial progress for studentId:', studentData2.id);
+          await StudentServiceAPI.createInitialProgress(studentData2.id, headers);
+          console.log('[GuardianService] Initial progress created successfully');
+        } catch (progressError) {
+          // Log but don't fail the registration if progress creation fails
+          console.error('[GuardianService] Failed to create initial progress:', progressError);
+        }
+      } else {
+        console.warn('[GuardianService] No student ID found in response:', response.data);
+      }
+
+      return studentData2;
     } catch (error) {
       handleApiError(error, 'Failed to register student');
     }

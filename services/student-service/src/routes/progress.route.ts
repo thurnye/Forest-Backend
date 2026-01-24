@@ -8,6 +8,13 @@ import {
 
 const router = Router();
 
+// POST /progress/:studentId/init - Create initial progress for a new student
+router.post(
+  '/:studentId/init',
+  validateParams(studentIdParamSchema),
+  ProgressController.createInitialProgress,
+);
+
 // GET /progress/:studentId - Get progress for a student
 router.get(
   '/:studentId',

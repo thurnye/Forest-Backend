@@ -109,10 +109,11 @@ export const login = async (
       return;
     }
 
-    // Generate tokens
+    // Generate tokens (username is undefined for guardians, role is 4th param)
     const { accessToken, refreshToken } = generateTokens(
       guardian._id.toString(),
       guardian.email,
+      undefined,
       guardian.role,
     );
 
@@ -185,10 +186,11 @@ export const refresh = async (
       (token) => token !== refreshToken,
     );
 
-    // Generate new tokens
+    // Generate new tokens (username is undefined for guardians, role is 4th param)
     const { accessToken, refreshToken: newRefreshToken } = generateTokens(
       guardian._id.toString(),
       guardian.email,
+      undefined,
       guardian.role,
     );
 

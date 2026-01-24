@@ -17,6 +17,7 @@ import assessmentRoutes from './routes/assessment.route';
 import attemptRoutes from './routes/attempt.route';
 import goalRoutes from './routes/goal.route';
 import assignmentRoutes from './routes/assignment.route';
+import dashboardRoutes from './routes/dashboard.route';
 
 const app = express();
 const PORT = process.env.PORT || 3003;
@@ -54,6 +55,7 @@ app.use('/assessments', assessmentRoutes);
 app.use('/attempts', attemptRoutes);
 app.use('/goals', goalRoutes);
 app.use('/assignments', assignmentRoutes);
+app.use('/dashboard', dashboardRoutes);
 
 // 404 handler
 app.use((_req: Request, res: Response) => {

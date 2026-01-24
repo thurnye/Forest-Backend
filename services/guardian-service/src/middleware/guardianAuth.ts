@@ -12,7 +12,11 @@ const ALLOWED_ROLES = ['PARENT', 'TEACHER', 'GUARDIAN'];
  * API Gateway handles JWT auth and forwards x-user-id, x-user-role headers
  * This middleware just validates role and extracts guardianId for convenience
  */
-export const guardianAuth = (req: Request, res: Response, next: NextFunction): void => {
+export const guardianAuth = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void => {
   const userId = req.headers['x-user-id'] as string;
   const userRole = (req.headers['x-user-role'] as string) || '';
 
@@ -30,7 +34,7 @@ export const guardianAuth = (req: Request, res: Response, next: NextFunction): v
   if (!ALLOWED_ROLES.includes(normalizedRole)) {
     res.status(403).json({
       success: false,
-      error: 'Forbidden: Only parents and teachers can access this resource',
+      error: 'Forbidden: Only guardians can access this resource',
     });
     return;
   }

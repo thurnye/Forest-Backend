@@ -123,6 +123,7 @@ export const login = async (
       student._id.toString(),
       '',
       student.username,
+      'STUDENT',
     );
 
     // Store refresh token in database
@@ -214,6 +215,7 @@ export const refresh = async (
       student._id.toString(),
       '',
       student.username,
+      'STUDENT',
     );
 
     // Store new refresh token

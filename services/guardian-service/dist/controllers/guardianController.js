@@ -4,11 +4,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const guardianService_1 = __importDefault(require("../services/guardianService"));
+const libs_1 = require("@readingForest/libs");
 class GuardianController {
     async getStudents(req, res, next) {
         try {
             const students = await guardianService_1.default.getStudents(req.guardianId);
-            res.json(students);
+            (0, libs_1.success)(res, students, 'Students fetched successfully');
         }
         catch (error) {
             next(error);
@@ -18,7 +19,7 @@ class GuardianController {
         try {
             const { studentId } = req.params;
             const student = await guardianService_1.default.getStudentDetail(req.guardianId, studentId);
-            res.json(student);
+            (0, libs_1.success)(res, student, 'Student detail fetched successfully');
         }
         catch (error) {
             next(error);
@@ -27,7 +28,7 @@ class GuardianController {
     async registerStudent(req, res, next) {
         try {
             const student = await guardianService_1.default.registerStudent(req.guardianId, req.body);
-            res.status(201).json(student);
+            (0, libs_1.success)(res, student, 'Student registered successfully', undefined, 201);
         }
         catch (error) {
             next(error);
@@ -37,7 +38,7 @@ class GuardianController {
         try {
             const { studentEmail } = req.body;
             const student = await guardianService_1.default.linkStudentByEmail(req.guardianId, studentEmail);
-            res.json(student);
+            (0, libs_1.success)(res, student, 'Student linked successfully');
         }
         catch (error) {
             next(error);
@@ -47,7 +48,7 @@ class GuardianController {
         try {
             const { studentId } = req.params;
             const result = await guardianService_1.default.unlinkStudent(req.guardianId, studentId);
-            res.json({ success: true, data: result });
+            (0, libs_1.success)(res, result, 'Student unlinked successfully');
         }
         catch (error) {
             next(error);
@@ -63,7 +64,7 @@ class GuardianController {
                 limit: limit ? parseInt(limit, 10) : undefined,
                 skip: skip ? parseInt(skip, 10) : undefined,
             });
-            res.json(exercises);
+            (0, libs_1.success)(res, exercises, 'Exercises fetched successfully');
         }
         catch (error) {
             next(error);
@@ -74,7 +75,7 @@ class GuardianController {
             const { studentId } = req.params;
             const { exerciseId, dueDate } = req.body;
             const assignment = await guardianService_1.default.createAssignment(req.guardianId, studentId, exerciseId, dueDate ? new Date(dueDate) : undefined);
-            res.status(201).json(assignment);
+            (0, libs_1.success)(res, assignment, 'Assignment created successfully', undefined, 201);
         }
         catch (error) {
             next(error);
@@ -86,7 +87,7 @@ class GuardianController {
                 ...req.body,
                 deadline: new Date(req.body.deadline),
             });
-            res.status(201).json(goal);
+            (0, libs_1.success)(res, goal, 'Goal created successfully', undefined, 201);
         }
         catch (error) {
             next(error);
@@ -101,7 +102,7 @@ class GuardianController {
                 limit: limit ? parseInt(limit, 10) : undefined,
                 skip: skip ? parseInt(skip, 10) : undefined,
             });
-            res.json(goals);
+            (0, libs_1.success)(res, goals, 'Goals fetched successfully');
         }
         catch (error) {
             next(error);
@@ -112,7 +113,7 @@ class GuardianController {
             const { studentId } = req.params;
             const { enabled } = req.body;
             const student = await guardianService_1.default.updateDiagnosticSetting(req.guardianId, studentId, enabled);
-            res.json(student);
+            (0, libs_1.success)(res, student, 'Diagnostic setting updated successfully');
         }
         catch (error) {
             next(error);

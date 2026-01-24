@@ -20,10 +20,11 @@ class StudentController {
    * GET /students/parent/:guardianId
    * Get all students for a guardian
    */
-  async getStudentsByParent(req: Request, res: Response, next: NextFunction) {
+  async getStudentsByGuardian(req: Request, res: Response, next: NextFunction) {
     try {
       const { guardianId } = req.params;
       const students = await StudentService.getStudentsByGuardianId(guardianId);
+      console.log('[StudentController] Retrieved students for guardianId:', guardianId, 'Count:', students.length);
       res.json(students);
     } catch (error) {
       next(error);

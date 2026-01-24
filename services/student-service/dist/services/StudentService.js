@@ -8,6 +8,9 @@ const models_1 = require("../db/models");
 const libs_1 = require("@readingForest/libs");
 class StudentService {
     async getStudentDetail(studentId) {
+        if (!mongoose_1.default.Types.ObjectId.isValid(studentId)) {
+            throw libs_1.Errors.badRequest('Invalid studentId');
+        }
         const result = await models_1.Student.aggregate([
             {
                 $match: { _id: new mongoose_1.default.Types.ObjectId(studentId) },
@@ -15,8 +18,12 @@ class StudentService {
             {
                 $lookup: {
                     from: 'studentprogresses',
-                    localField: '_id',
-                    foreignField: 'studentId',
+                    let: { studentId: '$_id' },
+                    pipeline: [
+                        { $match: { $expr: { $eq: ['$studentId', '$$studentId'] } } },
+                        { $sort: { lastActivityAt: -1, updatedAt: -1, createdAt: -1 } },
+                        { $limit: 1 },
+                    ],
                     as: 'progress',
                 },
             },
@@ -128,18 +135,54 @@ class StudentService {
         return result[0];
     }
     async getStudentsByGuardianId(guardianId) {
+        const guardianObjectId = mongoose_1.default.Types.ObjectId.isValid(guardianId)
+            ? new mongoose_1.default.Types.ObjectId(guardianId)
+            : null;
+        const guardianMatch = guardianObjectId
+            ? { $or: [{ guardianId: guardianObjectId }, { guardianId }] }
+            : { guardianId };
+        console.log('[StudentService] getStudentsByGuardianId called with:', guardianId);
+        console.log('[StudentService] Converted to ObjectId:', guardianObjectId);
+        const debugQuery = guardianObjectId
+            ? { $or: [{ guardianId: guardianObjectId }, { guardianId }] }
+            : { guardianId };
+        const debugStudents = await models_1.Student.find(debugQuery).lean();
+        console.log('[StudentService] Debug find result count:', debugStudents.length);
+        console.log('[StudentService] Debug students:', debugStudents.map((s) => ({
+            _id: s._id,
+            firstName: s.firstName,
+            guardianId: s.guardianId,
+            guardianIdType: typeof s.guardianId,
+            isActive: s.isActive,
+        })));
         const students = await models_1.Student.aggregate([
             {
                 $match: {
-                    guardianId: new mongoose_1.default.Types.ObjectId(guardianId),
-                    isActive: true,
+                    $and: [
+                        guardianMatch,
+                        { $or: [{ isActive: true }, { isActive: { $exists: false } }] },
+                    ],
                 },
             },
             {
                 $lookup: {
                     from: 'studentprogresses',
-                    localField: '_id',
-                    foreignField: 'studentId',
+                    let: { studentId: '$_id' },
+                    pipeline: [
+                        { $match: { $expr: { $eq: ['$studentId', '$$studentId'] } } },
+                        { $sort: { lastActivityAt: -1, updatedAt: -1, createdAt: -1 } },
+                        { $limit: 1 },
+                        {
+                            $project: {
+                                _id: 0,
+                                currentLevel: 1,
+                                exercisesCompleted: 1,
+                                averageScore: 1,
+                                streakDays: 1,
+                                lastActivityAt: 1,
+                            },
+                        },
+                    ],
                     as: 'progress',
                 },
             },
@@ -150,8 +193,14 @@ class StudentService {
                 },
             },
             {
-                $sort: { 'progress.lastActivityAt': -1, createdAt: -1 },
+                $addFields: {
+                    _lastActivityAt: {
+                        $ifNull: ['$progress.lastActivityAt', new Date(0)],
+                    },
+                },
             },
+            { $sort: { _lastActivityAt: -1, createdAt: -1 } },
+            { $unset: '_lastActivityAt' },
             {
                 $project: {
                     _id: 1,
@@ -163,9 +212,7 @@ class StudentService {
                     readingLevel: 1,
                     progress: {
                         currentLevel: { $ifNull: ['$progress.currentLevel', 'pre-k'] },
-                        exercisesCompleted: {
-                            $ifNull: ['$progress.exercisesCompleted', 0],
-                        },
+                        exercisesCompleted: { $ifNull: ['$progress.exercisesCompleted', 0] },
                         averageScore: { $ifNull: ['$progress.averageScore', 0] },
                         streakDays: { $ifNull: ['$progress.streakDays', 0] },
                         lastActivityAt: '$progress.lastActivityAt',
@@ -173,6 +220,7 @@ class StudentService {
                 },
             },
         ]);
+        console.log('[StudentService] getStudentsByGuardianId found students count:', students.length);
         return students;
     }
     async getStudentById(studentId) {
@@ -183,6 +231,9 @@ class StudentService {
         return student;
     }
     async createStudent(data) {
+        if (!mongoose_1.default.Types.ObjectId.isValid(data.guardianId)) {
+            throw libs_1.Errors.badRequest('Invalid guardianId');
+        }
         const student = await models_1.Student.create({
             ...data,
             guardianId: new mongoose_1.default.Types.ObjectId(data.guardianId),
@@ -216,9 +267,18 @@ class StudentService {
         return student;
     }
     async unlinkFromGuardian(studentId, guardianId) {
+        if (!mongoose_1.default.Types.ObjectId.isValid(studentId)) {
+            throw libs_1.Errors.badRequest('Invalid studentId');
+        }
+        const guardianObjectId = mongoose_1.default.Types.ObjectId.isValid(guardianId)
+            ? new mongoose_1.default.Types.ObjectId(guardianId)
+            : null;
+        const guardianMatch = guardianObjectId
+            ? { $or: [{ guardianId: guardianObjectId }, { guardianId }] }
+            : { guardianId };
         const student = await models_1.Student.findOne({
             _id: new mongoose_1.default.Types.ObjectId(studentId),
-            guardianId: new mongoose_1.default.Types.ObjectId(guardianId),
+            ...guardianMatch,
         });
         if (!student) {
             throw libs_1.Errors.notFound('Student not found or does not belong to this guardian');
@@ -228,6 +288,9 @@ class StudentService {
         return student;
     }
     async linkToGuardian(studentId, guardianId) {
+        if (!mongoose_1.default.Types.ObjectId.isValid(guardianId)) {
+            throw libs_1.Errors.badRequest('Invalid guardianId');
+        }
         const student = await models_1.Student.findById(studentId);
         if (!student) {
             throw libs_1.Errors.notFound('Student not found');
@@ -240,9 +303,18 @@ class StudentService {
         return student;
     }
     async verifyStudentOwnership(studentId, guardianId) {
+        if (!mongoose_1.default.Types.ObjectId.isValid(studentId)) {
+            return false;
+        }
+        const guardianObjectId = mongoose_1.default.Types.ObjectId.isValid(guardianId)
+            ? new mongoose_1.default.Types.ObjectId(guardianId)
+            : null;
+        const guardianMatch = guardianObjectId
+            ? { $or: [{ guardianId: guardianObjectId }, { guardianId }] }
+            : { guardianId };
         const student = await models_1.Student.findOne({
             _id: new mongoose_1.default.Types.ObjectId(studentId),
-            guardianId: new mongoose_1.default.Types.ObjectId(guardianId),
+            ...guardianMatch,
             isActive: true,
         });
         return !!student;

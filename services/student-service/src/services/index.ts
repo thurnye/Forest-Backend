@@ -5,3 +5,4 @@ export { default as AssessmentService } from './AssessmentService';
 export { default as AttemptService } from './AttemptService';
 export { default as GoalService } from './GoalService';
 export { default as AssignmentService } from './AssignmentService';
+export { default as DashboardService } from './DashboardService';

@@ -5,3 +5,4 @@ export { default as AssessmentController } from './AssessmentController';
 export { default as AttemptController } from './AttemptController';
 export { default as GoalController } from './GoalController';
 export { default as AssignmentController } from './AssignmentController';
+export { default as DashboardController } from './DashboardController';

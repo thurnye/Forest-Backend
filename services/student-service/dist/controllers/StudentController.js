@@ -12,10 +12,11 @@ class StudentController {
             next(error);
         }
     }
-    async getStudentsByParent(req, res, next) {
+    async getStudentsByGuardian(req, res, next) {
         try {
             const { guardianId } = req.params;
             const students = await services_1.StudentService.getStudentsByGuardianId(guardianId);
+            console.log('[StudentController] Retrieved students for guardianId:', guardianId, 'Count:', students.length);
             res.json(students);
         }
         catch (error) {
